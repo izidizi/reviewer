@@ -1,0 +1,19 @@
+<h4>Today statistics</h4>
+<p>New</p>
+<ul>
+  @for (articleId of this.statisticsStore.todayNewCompleted(); track $index) {
+    <li>{{articleId}}</li>
+  }
+</ul>
+<p>Repeated</p>
+<ul>
+  @for (articleId of this.statisticsStore.todayRepeatCompleted(); track $index) {
+    <li>{{articleId}}</li>
+  }
+</ul>
+<p>Consolidated</p>
+<ul>
+  @for (articleId of this.statisticsStore.todayConsolidateCompleted(); track $index) {
+    <li>{{articleId}}</li>
+  }
+</ul>
