@@ -1,5 +1,6 @@
-export function isToday(date: Date) {
+export function isToday(date: Date | undefined | null) {
   const today = new Date();
+  if (!date) return false;
   return (
     date.getDate() === today.getDate() &&
     date.getMonth() === today.getMonth() &&

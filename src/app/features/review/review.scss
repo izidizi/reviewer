@@ -1,0 +1,16 @@
+.spacer {
+  flex: 1 1 auto; }
+
+.actions {
+  justify-content: center;
+  align-items: center; }
+
+.markdown-body.dark {
+  color-scheme: dark;
+
+  --fgColor-default: #f0f6fc;
+  --bgColor-default: #0d1117;
+
+  --fgColor-muted: #8b949e;
+  --borderColor-default: #30363d;
+}

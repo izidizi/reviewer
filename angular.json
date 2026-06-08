@@ -30,7 +30,14 @@
               }
             ],
             "styles": [
-              "src/styles.scss"
+              "src/styles.scss",
+              "node_modules/github-markdown-css/github-markdown.css",
+              "node_modules/prismjs/themes/prism.css",
+              "node_modules/katex/dist/katex.min.css"
+            ],
+            "scripts": [
+              "node_modules/katex/dist/katex.min.js",
+              "node_modules/katex/dist/contrib/auto-render.min.js"
             ]
           },
           "configurations": {

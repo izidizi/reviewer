@@ -1,0 +1,23 @@
+<mat-card>
+  <mat-card-header class="centered">
+    <mat-card-title>Reviewer</mat-card-title>
+  </mat-card-header>
+  <mat-card-content class="content">
+    <h5>Choose vault:</h5>
+    <mat-action-list>
+      @for (vault of vaultService.availableVaults(); track $index) {
+        <button mat-list-item (click)="chooseVault(vault)" [disabled]="isLoading()">{{vault}}</button>
+      }
+    </mat-action-list>
+  </mat-card-content>
+  <mat-action-list>
+    <div class="actions">
+      <mat-form-field>
+        <mat-label>Vault path</mat-label>
+        <input matInput [disabled]="isLoading()" value="" #path>
+      </mat-form-field>
+
+      <button matButton="outlined" [disabled]="isLoading()" (click)="addVault(path.value); path.value = ''">Add vault</button>
+    </div>
+  </mat-action-list>
+</mat-card>

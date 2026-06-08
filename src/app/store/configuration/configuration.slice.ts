@@ -2,19 +2,21 @@ import { DriveId } from '../../model/drive-id';
 import { Path } from '../../model/path';
 
 export interface ConfigurationSlice {
-  configurationPath: Path;
-  configurationPathDriveId: DriveId | null;
-  configurationName: string | null;
-  configurationNameDriveId: DriveId | null;
+  vaultRootPath: Path;
+  vaultRootPathDriveId: DriveId | null;
+  vaultConfigurationName: string | null;
+  vaultConfigurationDriveId: DriveId | null;
   isLoaded: boolean;
+  isUpdated: boolean;
   path: Path;
 }
 
 export const initialConfigurationSlice: ConfigurationSlice = {
-  configurationPath: [],
-  configurationPathDriveId: null,
-  configurationName: null,
-  configurationNameDriveId: null,
+  vaultRootPath: [],
+  vaultRootPathDriveId: null,
+  vaultConfigurationName: null,
+  vaultConfigurationDriveId: null,
+  isUpdated: false,
   isLoaded: false,
   path: [],
 };

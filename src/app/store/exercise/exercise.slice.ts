@@ -12,6 +12,8 @@ export interface ExerciseSlice {
   newArticlesPerDay: number;
   repeatTimes: number;
 
+  isUpdated: boolean;
+
   todayNew: ArticleId[];
   todayRepeat: ArticleId[];
   todayConsolidate: ArticleId[];
@@ -28,6 +30,8 @@ export const initialExerciseSlice: ExerciseSlice = {
 
   newArticlesPerDay: 3,
   repeatTimes: 2,
+
+  isUpdated: false,
 
   todayNew: [],
   todayRepeat: [],

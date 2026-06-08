@@ -1,9 +1,12 @@
 :host {
-  height: 100%; }
-
-div {
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display: block;
+  min-width: 15rem;
 }
+
+mat-card {
+  .content {
+    min-height: 5rem; }
+}
+
+.centered {
+  justify-content: center; }

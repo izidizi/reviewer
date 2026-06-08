@@ -10,6 +10,7 @@ export const ExerciseStore = signalStore(
   withState(initialExerciseSlice),
   withComputed((store) => ({
     configuration: computed(() => ({
+      startDate: store.startDate(),
       includeTags: store.includeTags(),
       includeTopics: store.includeTopics(),
       excludeTags: store.excludeTags(),
@@ -27,6 +28,9 @@ export const ExerciseStore = signalStore(
 
       patchStartDate: (startDate: ExerciseSlice['startDate']) =>
         patchState(store, updaters.patchStartDate(startDate)),
+      patchConfiguration: (data: updaters.PatchConfiguration) =>
+        patchState(store, updaters.patchConfiguration(data)),
+      resetIsUpdated: () => patchState(store, updaters.resetIsUpdated()),
     };
   }),
 );

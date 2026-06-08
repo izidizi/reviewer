@@ -21,7 +21,9 @@ export class ArticleService {
   }): VaultArticle {
     const topicsIndex = text.indexOf('### Links');
     const topicsConent = text.substring(topicsIndex);
-    const cutIndex = text.indexOf('### References');
+    const cutIndexReferences = text.indexOf('### References');
+    const cutIndexLinks = text.indexOf('### Links');
+    const cutIndex = cutIndexReferences > 0 ? cutIndexReferences : cutIndexLinks;
     const content = cutIndex > 0 ? text.substring(0, cutIndex) : text;
 
     return {

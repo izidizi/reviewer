@@ -1,8 +1,5 @@
 import { inject, InjectionToken } from '@angular/core';
 import { DriveApiService } from '../../services/drive-api/drive-api.service';
-import { LogoutProcess } from './logout.process';
-import { DriveApiAuthenticationError } from '../../services/drive-api/drive-api-errors';
-import { CheckAuthProcess } from './check-auth.process';
 import { parsePath, Path } from '../model/path';
 import { ProcessError, ProcessUnhandledError } from '../../model/error/process-error';
 import { ZipService } from '../../services/zip/zip.service';
@@ -18,21 +15,15 @@ import { ReviewStorage } from '../../model/storage/review';
 import { StatisticsStore } from '../store/statistics/statistics.store';
 import { ExerciseSlice, initialExerciseSlice } from '../store/exercise/exercise.slice';
 import { ExerciseStore } from '../store/exercise/exercise.store';
+import { logDebug, logError } from '../../services/debug-logger';
+import { GetDirectoryDriveIdProcess } from './vault';
+import { CheckAuthBL } from '../process-bl';
 
 export class RootPathNotDefined extends ProcessError {
   constructor() {
     super({
-      process: 'LoadConfigurationProcess',
+      process,
       message: `root path not defined`,
-    });
-  }
-}
-
-export class RootPathNotFound extends ProcessError {
-  constructor(path: Path) {
-    super({
-      process: 'LoadConfigurationProcess',
-      message: `root path ${path.join('/')} not found`,
     });
   }
 }
@@ -40,8 +31,17 @@ export class RootPathNotFound extends ProcessError {
 export class ConfigurationNotFound extends ProcessError {
   constructor(path: Path, fileName: string) {
     super({
-      process: 'LoadConfigurationProcess',
+      process,
       message: `root path ${path.join('/')} doesn't contain configuration file '${fileName}'`,
+    });
+  }
+}
+
+export class FailedToLoadConfigurationError extends ProcessError {
+  constructor(path: Path, fileName: string) {
+    super({
+      process,
+      message: `failed to load configuration ${path.join('/')}/'${fileName}'`,
     });
   }
 }
@@ -59,8 +59,8 @@ export const LoadConfigurationProcess = new InjectionToken<LoadConfigurationProc
       const vaultIndexStore = inject(VaultIndexStore);
       const statisticsStore = inject(StatisticsStore);
       const exerciseStore = inject(ExerciseStore);
-      const logoutProcess = inject(LogoutProcess);
-      const checkAuthProcess = inject(CheckAuthProcess);
+      const checkAuthProcess = inject(CheckAuthBL);
+      const getDirectoryDriveIdProcess = inject(GetDirectoryDriveIdProcess);
 
       return loadConfigurationProcess({
         zipService,
@@ -70,13 +70,14 @@ export const LoadConfigurationProcess = new InjectionToken<LoadConfigurationProc
         vaultIndexStore,
         statisticsStore,
         exerciseStore,
-        logoutProcess,
         checkAuthProcess,
+        getDirectoryDriveIdProcess,
       });
     },
   },
 );
 
+const process = 'LoadConfigurationProcess';
 function loadConfigurationProcess({
   zipService,
   driveApi,
@@ -85,8 +86,8 @@ function loadConfigurationProcess({
   statisticsStore,
   vaultIndexStore,
   exerciseStore,
-  logoutProcess,
   checkAuthProcess,
+  getDirectoryDriveIdProcess,
 }: {
   zipService: ZipService;
   driveApi: DriveApiService;
@@ -95,64 +96,73 @@ function loadConfigurationProcess({
   vaultIndexStore: VaultIndexStore;
   statisticsStore: StatisticsStore;
   exerciseStore: ExerciseStore;
-  logoutProcess: LogoutProcess;
-  checkAuthProcess: CheckAuthProcess;
+  checkAuthProcess: CheckAuthBL;
+  getDirectoryDriveIdProcess: GetDirectoryDriveIdProcess;
 }): LoadConfigurationProcess {
-  return async () => {
+  return async (path, fileName) => {
+    logDebug(`${process} - start`, { includeStack: true });
     const accessToken = await checkAuthProcess();
 
-    if (configurationStore.isLoaded()) return;
-    const path = configurationStore.configurationPath();
-    const fileName = configurationStore.configurationName();
     if (path.length === 0 || !fileName) {
       throw new RootPathNotDefined();
     }
 
-    let rootId: string | null = null;
+    const rootId: string = await getDirectoryDriveIdProcess(accessToken, path);
+
+    const { files } = await driveApi.listFiles(accessToken, rootId).catch((error): never => {
+      logError(error, `${process} - failed to list files`, `dir: ${path.join('/')}`);
+
+      // abort
+      throw new FailedToLoadConfigurationError(path, fileName);
+    });
+    const configurationFile = files.find(
+      ({ mimeType, name }) => mimeType === 'application/zip' && name === fileName,
+    );
+
+    if (!configurationFile) {
+      throw new ConfigurationNotFound(path, fileName);
+    }
+
+    const configurationStream = await driveApi
+      .getBinaryFileContent(accessToken, configurationFile.id)
+      .catch((error): never => {
+        logError(
+          error,
+          `${process} - failed to get file content`,
+          `dir: ${path.join('/')}/${fileName}`,
+        );
+
+        // abort
+        throw new FailedToLoadConfigurationError(path, fileName);
+      });
+
+    const configurationMap = await zipService.extractAllJSON(configurationStream).catch((error) => {
+      logError(error, `${process} - failed extract content`, `${path.join('/')}/${fileName}`);
+
+      // abort
+      throw new FailedToLoadConfigurationError(path, fileName);
+    });
+    configurationStore.loadConfiguration({
+      vaultRootPath: path,
+      vaultRootPathDriveId: getDriveId(rootId!),
+      vaultConfigurationName: fileName,
+      vaultConfigurationDriveId: getDriveId(configurationFile.id),
+    });
 
     try {
-      for (const pathItem of path) {
-        const { files } = await driveApi.listFiles(accessToken, rootId ?? 'root');
-        rootId =
-          files.find(
-            ({ mimeType, name }) =>
-              mimeType === 'application/vnd.google-apps.folder' && name === pathItem,
-          )?.id ?? null;
-        if (rootId === null) {
-          throw new RootPathNotFound(path);
-        }
-      }
-
-      const { files } = await driveApi.listFiles(accessToken, rootId!);
-      const configurationFile = files.find(
-        ({ mimeType, name }) => mimeType === 'application/zip' && name === fileName,
-      );
-
-      if (!configurationFile) {
-        throw new ConfigurationNotFound(path, fileName);
-      }
-
-      const configurationStream = await driveApi.getBinaryFileContent(
-        accessToken,
-        configurationFile.id,
-      );
-      const configurationMap = await zipService.extractAllJSON(configurationStream);
-
       // configuration
       const configurationStorage = configurationMap[
         'configuration.json'
       ] as VaultConfigurationStorage;
-      configurationStore.setConfiguration({
-        path: parsePath(configurationStorage.path),
-        configurationPathDriveId: getDriveId(rootId!),
-        configurationNameDriveId: getDriveId(configurationFile.id),
-      });
+      logDebug(`${process} - parsing configuration`, { payload: { configurationStorage } });
+      configurationStore.setVaultConfiguration({ path: parsePath(configurationStorage.path) });
 
       // index
       const vaultIndexStorage = configurationMap['index.json'] as VaultIndexStorage;
       const articles: VaultIndexSlice['articles'] = {};
       vaultIndexStorage.articles.forEach(
         ({ driveId, path, name, topics: links, tags, indexed }) => {
+          logDebug(`${process} - parsing article`, { entity: `${path}/${name}` });
           const articleId: ArticleId = getArticleId(path, name);
           articles[articleId] = {
             driveId: getDriveId(driveId),
@@ -168,6 +178,9 @@ function loadConfigurationProcess({
       );
       vaultIndexStore.setArticles(articles);
 
+      logDebug(`${process} - parsing exercise configuration`, {
+        payload: { exerciseConfiguration: vaultIndexStorage.exerciseConfiguration },
+      });
       const exerciseConfiguration: ExerciseSlice = initialExerciseSlice;
       exerciseConfiguration.startDate = new Date(vaultIndexStorage.exerciseConfiguration.startDate);
       exerciseConfiguration.includeTags = vaultIndexStorage.exerciseConfiguration.includeTags;
@@ -180,20 +193,23 @@ function loadConfigurationProcess({
       exerciseStore.setInitialConfiguration(exerciseConfiguration);
 
       // reviews
+      logDebug(`${process} - parsing reviews`);
       processReviews(configurationMap['results.json'] as ReviewStorage[], {
         exerciseConfiguration,
         resultsService,
         statisticsStore,
       });
     } catch (error) {
-      if (error instanceof DriveApiAuthenticationError) {
-        await logoutProcess();
-        return;
-      }
-      console.warn(error);
+      logError(
+        error,
+        `${process} - error while parsing vault configuration`,
+        `${path.join('/')}/${fileName}`,
+      );
 
-      throw new ProcessUnhandledError({ process: 'LoadConfigurationProcess', cause: error });
+      throw new ProcessUnhandledError({ process, cause: error });
     }
+
+    logDebug(`${process} - finish`);
   };
 }
 

@@ -37,6 +37,7 @@ export function moveArticleProcess({
       };
     });
     statisticsStore.setReviews(reviews);
+    statisticsStore.setIsUpdated();
 
     // TODO: update statisticsStore.articles
     // TODO: update statisticsStore.exercises

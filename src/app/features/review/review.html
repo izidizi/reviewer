@@ -1,0 +1,25 @@
+<mat-toolbar>
+  <mat-toolbar-row>
+    <span>{{title()}}</span>
+    <span class="spacer"></span>
+    <button
+      matIconButton
+      class="material-icons-outlined"
+      aria-label="Exit review"
+      (click)="onClose()"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  </mat-toolbar-row>
+  <mat-toolbar-row>
+    @for (topic of articleTopics(); track $index) {
+      <span>{{topic}}</span>
+    }
+  </mat-toolbar-row>
+  <mat-toolbar-row class="actions">
+    <app-review-buttons [result]="reviewResult()" (select)="selectResult($event)" />
+  </mat-toolbar-row>
+</mat-toolbar>
+<div class="markdown-body dark">
+  <markdown mermaid katex [data]="articleContent()"></markdown>
+</div>

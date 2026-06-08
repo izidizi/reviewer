@@ -15,6 +15,8 @@ export const StatisticsStore = signalStore(
     return {
       setReviews: (reviews: ReviewStorage[]) => patchState(store, updaters.setReviews(reviews)),
       addReview: (review: ReviewStorage) => patchState(store, updaters.addReview(review)),
+      setIsUpdated: () => patchState(store, updaters.setIsUpdated()),
+      resetIsUpdated: () => patchState(store, updaters.resetIsUpdated()),
       setArticleStatistics: (statistics: StatisticsSlice['articles']) =>
         patchState(store, updaters.setArticleStatistics(statistics)),
       addStatistics: (articleStatisics: VaultArticleStatistics) =>

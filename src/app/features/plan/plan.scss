@@ -1,0 +1,14 @@
+h3 {
+  margin-bottom: 0; }
+
+.positive {
+  --mat-list-list-item-leading-icon-color: green;
+  --mat-list-list-item-hover-leading-icon-color: green; }
+
+.incomplete {
+  --mat-list-list-item-leading-icon-color: orange;
+  --mat-list-list-item-hover-leading-icon-color: orange; }
+
+.negative {
+  --mat-list-list-item-leading-icon-color: red;
+  --mat-list-list-item-hover-leading-icon-color: red; }

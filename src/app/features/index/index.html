@@ -1,0 +1,96 @@
+<app-index-toolbar />
+
+<div class="progress-bar-wrapper">
+  @if (isIndexProcessActive()) {
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  }
+</div>
+
+<mat-form-field>
+  <mat-label>Filter</mat-label>
+  <input matInput (keyup)="applyFilter($event)">
+</mat-form-field>
+
+<table mat-table [dataSource]="dataSource" multiTemplateDataRows class="mat-elevation-z8">
+
+  <!-- Position Column -->
+  <ng-container matColumnDef="position">
+    <th mat-header-cell *matHeaderCellDef> No. </th>
+    <td mat-cell *matCellDef="let element"> {{element.position}} </td>
+  </ng-container>
+
+    <!-- Exists Column -->
+  <ng-container matColumnDef="exists">
+    <th mat-header-cell *matHeaderCellDef> Exists </th>
+    <td mat-cell *matCellDef="let record">
+      <mat-icon
+        class="material-icons-outlined"
+      >{{record.exists ? 'check_circle' : 'close'}}</mat-icon>
+    </td>
+  </ng-container>
+
+  <!-- ArticleId Column -->
+  <ng-container matColumnDef="articleId">
+    <th mat-header-cell *matHeaderCellDef> ID </th>
+    <td mat-cell *matCellDef="let record"> {{record.articleId}} </td>
+  </ng-container>
+
+  <!-- Indexed Column -->
+  <ng-container matColumnDef="indexed">
+    <th mat-header-cell *matHeaderCellDef> Indexed </th>
+    <td mat-cell *matCellDef="let record"> {{record.indexed}} </td>
+  </ng-container>
+
+  <!-- Total Reviewed Column -->
+  <ng-container matColumnDef="totalReviewed">
+    <th mat-header-cell *matHeaderCellDef> Total </th>
+    <td mat-cell *matCellDef="let record"> {{record.totalReviewed}} </td>
+  </ng-container>
+
+  <!-- Overall Score Column -->
+  <ng-container matColumnDef="overallScore">
+    <th mat-header-cell *matHeaderCellDef> Score </th>
+    <td mat-cell *matCellDef="let record">
+      <mat-icon
+        class="material-icons-outlined"
+      >{{record.overallScore}}</mat-icon>
+    </td>
+  </ng-container>
+
+  <!-- Expand button -->
+  <ng-container matColumnDef="expand">
+    <th mat-header-cell *matHeaderCellDef aria-label="row actions">&nbsp;</th>
+    <td mat-cell *matCellDef="let record">
+      <button
+        matIconButton
+        aria-label="expand row"
+        (click)="toggle(record.articleId); $event.stopPropagation()"
+        class="toggle-button"
+        [class.toggle-button-expanded]="isExpanded(record.articleId)">
+        <mat-icon class="material-icons-outlined">keyboard_arrow_down</mat-icon>
+      </button>
+    </td>
+  </ng-container>
+
+  <!-- Expanded content -->
+  <ng-container matColumnDef="expandedDetail">
+    <td mat-cell *matCellDef="let record" [attr.colspan]="columnsToDisplayWithExpand.length">
+      <div class="article-detail-wrapper"
+        [class.article-detail-wrapper-expanded]="isExpanded(record.articleId)">
+        <app-index-article-details [articleId]="record.articleId" />
+      </div>
+    </td>
+  </ng-container>
+
+  <tr mat-header-row *matHeaderRowDef="columnsToDisplayWithExpand"></tr>
+  <tr mat-row *matRowDef="let row; columns: columnsToDisplayWithExpand;"
+    class="article-row"
+    [class.expanded-article-row]="isExpanded(row.articleId)"
+    (click)="toggle(row.articleId)"
+  ></tr>
+  <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="article-detail-row"></tr>
+
+  <tr class="mat-row" *matNoDataRow>
+    <td class="no-data-cell" colspan="5">No articles matching the filter</td>
+  </tr>
+</table>

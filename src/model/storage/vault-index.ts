@@ -3,7 +3,7 @@ import { EmptyISO8601String } from '../utils/iso8601-string';
 
 export type VaultIndexStorage = {
   articles: VaultIndexArticleStorage[];
-  exerciseConfiguration: ValudIndexExerciseConfiguration;
+  exerciseConfiguration: VaultIndexExerciseConfiguration;
 };
 
 export type VaultIndexArticleStorage = {
@@ -15,8 +15,8 @@ export type VaultIndexArticleStorage = {
   indexed: ISO8601String | EmptyISO8601String;
 };
 
-export type ValudIndexExerciseConfiguration = {
-  startDate: string;
+export type VaultIndexExerciseConfiguration = {
+  startDate: ISO8601String | EmptyISO8601String;
 
   includeTags: string[];
   includeTopics: string[];

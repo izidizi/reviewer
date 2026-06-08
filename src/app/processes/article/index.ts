@@ -5,10 +5,9 @@ import { ExerciseStore } from '../../store/exercise/exercise.store';
 import { moveArticleProcess } from './move.process';
 import { ArticleId } from '../../model/article-id';
 import { DriveApiService } from '../../../services';
-import { LogoutProcess } from '../logout.process';
-import { CheckAuthProcess } from '../check-auth.process';
 import { ArticleService } from '../../../services/article/article.service';
 import { getArticleContentProcess } from './get-content';
+import { CheckAuthBL, ParseArticleIdBL } from '../../process-bl';
 
 export type MoveArticleProcess = (from: ArticleId, to: ArticleId) => void;
 export const MoveArticleProcess = new InjectionToken<MoveArticleProcess>('MoveArticleProcess', {
@@ -29,15 +28,16 @@ export const GetArticleContentProcess = new InjectionToken<GetArticleContentProc
     providedIn: 'root',
     factory: () => {
       const driveApi = inject(DriveApiService);
-      const logoutProcess = inject(LogoutProcess);
-      const checkAuthProcess = inject(CheckAuthProcess);
+      const parseArticleId = inject(ParseArticleIdBL);
+      const checkAuth = inject(CheckAuthBL);
+
       const vaultIndexStore = inject(VaultIndexStore);
       const articleService = inject(ArticleService);
 
       return getArticleContentProcess({
         driveApi,
-        logoutProcess,
-        checkAuthProcess,
+        parseArticleId,
+        checkAuth,
         vaultIndexStore,
         articleService,
       });

@@ -7,7 +7,7 @@ import {
   withState,
 } from '@ngrx/signals';
 import { effect } from '@angular/core';
-import { ConfigurationSlice, initialConfigurationSlice } from './configuration.slice';
+import { initialConfigurationSlice } from './configuration.slice';
 import { parsePath, Path } from '../../model/path';
 import * as updaters from './configuration.updaters';
 
@@ -20,12 +20,14 @@ export const ConfigurationStore = signalStore(
     return {
       setInitialConfiguration: (configurationPath: Path, configurationName: string) =>
         patchState(store, updaters.setInitialConfiguration(configurationPath, configurationName)),
-      setConfiguration: (
-        configuration: Pick<
-          ConfigurationSlice,
-          'path' | 'configurationPathDriveId' | 'configurationNameDriveId'
-        >,
-      ) => patchState(store, updaters.setConfiguration(configuration)),
+      loadConfiguration: (data: updaters.LoadConfigurationData) =>
+        patchState(store, updaters.loadConfiguration(data)),
+      setVaultConfiguration: (data: updaters.SetVaultConfigurationData) =>
+        patchState(store, updaters.setVaultConfiguration(data)),
+      pathVaultConfiguration: (data: updaters.PathVaultConfigurationData) =>
+        patchState(store, updaters.pathVaultConfiguration(data)),
+      resetIsUpdated: () => patchState(store, updaters.resetIsUpdated()),
+      patchPath: (path: Path) => patchState(store, updaters.patchPath(path)),
     };
   }),
   withHooks((store) => ({
@@ -40,7 +42,7 @@ export const ConfigurationStore = signalStore(
       const configurationPath = path.slice(0, -1);
       const configurationName = path.pop();
       if (!configurationName) {
-        console.log('not app configuration found (name)');
+        console.log('no app configuration found (name)');
         return;
       }
 

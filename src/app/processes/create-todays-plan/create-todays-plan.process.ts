@@ -4,6 +4,7 @@ import { CreateTodaysPlan } from '.';
 import { VaultIndexStore } from '../../store/vault-index/vault-index.store';
 import { findArticles } from './find-articles';
 import { isToday } from '../../helpers';
+import { ReviewResultPositive } from '../../model/review-result';
 
 export function createTodaysPlanProcess({
   vaultIndexStore,
@@ -64,6 +65,7 @@ export function createTodaysPlanProcess({
       .filter(
         ({ articleId }) =>
           exerciseStatistics[articleId]?.started &&
+          exerciseStatistics[articleId]?.startResult !== ReviewResultPositive &&
           exerciseStatistics[articleId]?.repeates.length < configuration.repeatTimes,
       )
       .sort(({ articleId: idA }, { articleId: idB }) =>
@@ -73,8 +75,8 @@ export function createTodaysPlanProcess({
       .slice(
         0,
         alreadyDoneRepeat > configuration.newArticlesPerDay
-          ? configuration.newArticlesPerDay - alreadyDoneRepeat
-          : 0,
+          ? 0
+          : configuration.newArticlesPerDay - alreadyDoneRepeat,
       )
       .map(({ articleId }) => articleId);
 
@@ -83,8 +85,19 @@ export function createTodaysPlanProcess({
       .filter(({ articleId }) => {
         if (!exerciseStatistics[articleId]) return false;
         if (!exerciseStatistics[articleId].started) return false;
-        if (exerciseStatistics[articleId].repeates.length < configuration.repeatTimes) return false;
+        if (isToday(exerciseStatistics[articleId].started)) return false;
+        if (
+          exerciseStatistics[articleId].startResult !== ReviewResultPositive &&
+          exerciseStatistics[articleId].repeates.length < configuration.repeatTimes
+        )
+          return false;
 
+        if (todayNew.includes(articleId)) return false;
+        if (todayRepeat.includes(articleId)) return false;
+
+        for (const date of exerciseStatistics[articleId].repeates) {
+          if (isToday(date)) return false;
+        }
         for (const { date } of exerciseStatistics[articleId].consolidations) {
           if (isToday(date)) return false;
         }
@@ -125,7 +138,7 @@ export function createTodaysPlanProcess({
         return exerciseStatistics[idA]!.started < exerciseStatistics[idB]!.started ? -1 : 1;
       });
     const todayConsolidate = consolidateArticles
-      .slice(0, 3 * configuration.newArticlesPerDay)
+      .slice(0, 2 * configuration.newArticlesPerDay)
       .map(({ articleId }) => articleId);
 
     exerciseStore.setTodayConfiguration({

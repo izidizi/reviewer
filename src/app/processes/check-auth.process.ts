@@ -2,12 +2,18 @@ import { inject, InjectionToken } from '@angular/core';
 import { AuthStore } from '../store/auth/auth.store';
 import { ProcessError } from '../../model/error/process-error';
 
-export class UserNotAuthorised extends ProcessError {
+/**
+ * @deprecated use CheckAuthBL and UserNotAuthorised error
+ */
+export class UserNotAuthorisedDeprecated extends ProcessError {
   constructor() {
     super({ process: 'CheckAuthProcess', message: 'user is not authorized' });
   }
 }
 
+/**
+ * @deprecated use CheckAuthBL
+ */
 export type CheckAuthProcess = () => Promise<string>;
 export const CheckAuthProcess = new InjectionToken<CheckAuthProcess>('CheckAuthProcess', {
   providedIn: 'root',
@@ -23,7 +29,7 @@ function checkAuthProcess({ authStore }: { authStore: AuthStore }): CheckAuthPro
     const accessToken = authStore.accessToken();
     if (!accessToken) {
       // redirect to login
-      throw new UserNotAuthorised();
+      throw new UserNotAuthorisedDeprecated();
     }
 
     return accessToken;

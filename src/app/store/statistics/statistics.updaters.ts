@@ -7,6 +7,7 @@ export const setReviews: (reviews: ReviewStorage[]) => PartialStateUpdater<Stati
   reviews,
 ) => {
   return () => ({
+    isUpdated: false,
     reviews,
   });
 };
@@ -15,7 +16,20 @@ export const addReview: (review: ReviewStorage) => PartialStateUpdater<Statistic
   review,
 ) => {
   return (state) => ({
+    isUpdated: true,
     reviews: [...state.reviews, review],
+  });
+};
+
+export const setIsUpdated: () => PartialStateUpdater<StatisticsSlice> = () => {
+  return () => ({
+    isUpdated: true,
+  });
+};
+
+export const resetIsUpdated: () => PartialStateUpdater<StatisticsSlice> = () => {
+  return () => ({
+    isUpdated: false,
   });
 };
 

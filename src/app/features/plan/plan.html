@@ -1,0 +1,53 @@
+<h3>New</h3>
+<mat-list>
+  @for (article of this.new(); track $index) {
+    <a mat-list-item (click)="open(article.articleId)">
+      <mat-icon
+        matListItemIcon
+        [class]="['material-icons-outlined', article.result]"
+      >{{article.reviewed ? 'check_circle' : 'circle'}}</mat-icon>
+      <div matListItemTitle>{{article.articleId}}</div>
+      <div matListItemLine>
+        @for (tag of article.tags; track $index) {
+          <app-tag [tag]="tag" />
+        }
+      </div>
+    </a>
+  }
+</mat-list>
+
+<h3>Repeat</h3>
+<mat-list>
+  @for (article of this.repeat(); track $index) {
+    <a mat-list-item (click)="open(article.articleId)">
+      <mat-icon
+        matListItemIcon
+        [class]="['material-icons-outlined', article.result]"
+      >{{article.reviewed ? 'check_circle' : 'circle'}}</mat-icon>
+      <div matListItemTitle>{{article.articleId}}</div>
+      <div matListItemLine>
+        @for (tag of article.tags; track $index) {
+          <app-tag [tag]="tag" />
+        }
+      </div>
+    </a>
+  }
+</mat-list>
+
+<h3>Consolidate</h3>
+<mat-list>
+  @for (article of this.consolidate(); track $index) {
+    <a mat-list-item (click)="open(article.articleId)">
+      <mat-icon
+        matListItemIcon
+        [class]="['material-icons-outlined', article.result]"
+      >{{article.reviewed ? 'check_circle' : 'circle'}}</mat-icon>
+      <div matListItemTitle>{{article.articleId}}</div>
+      <div matListItemLine>
+        @for (tag of article.tags; track $index) {
+          <app-tag [tag]="tag" />
+        }
+      </div>
+    </a>
+  }
+</mat-list>

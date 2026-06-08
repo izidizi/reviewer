@@ -1,3 +1,9 @@
-<div>
-  <button (click)="loginProcess()" [disabled]="authState.isPending()">Login</button>
-</div>
+<mat-card>
+  <mat-card-header class="centered">
+    <mat-card-title>Reviewer</mat-card-title>
+  </mat-card-header>
+  <mat-card-content class="content"></mat-card-content>
+  <mat-card-actions class="centered">
+    <button matButton (click)="login()" [disabled]="authState.isPending()">Login</button>
+  </mat-card-actions>
+</mat-card>

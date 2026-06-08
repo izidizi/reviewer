@@ -9,13 +9,14 @@ import { ConfigurationStore } from '../store/configuration/configuration.store';
 import { VaultConfigurationStorage } from '../../model/storage/configuration';
 import { VaultIndexStore } from '../store/vault-index/vault-index.store';
 import {
-  ValudIndexExerciseConfiguration,
+  VaultIndexExerciseConfiguration,
   VaultIndexArticleStorage,
   VaultIndexStorage,
 } from '../../model/storage/vault-index';
 import { StatisticsStore } from '../store/statistics/statistics.store';
 import { ExerciseStore } from '../store/exercise/exercise.store';
 import { dateToISO80601String } from '../../model/utils';
+import { file } from 'jszip';
 
 export class NoConfigurationError extends ProcessError {
   constructor() {
@@ -90,10 +91,12 @@ function saveConfigurationProcess({
       throw new NoConfigurationError();
     }
 
-    const configurationFileName = configurationStore.configurationName();
-    const pathDriveId = configurationStore.configurationPathDriveId();
-    const fileDriveId = configurationStore.configurationNameDriveId();
+    const configurationFileName = configurationStore.vaultConfigurationName();
+    const pathDriveId = configurationStore.vaultRootPathDriveId();
+    const fileDriveId = configurationStore.vaultConfigurationDriveId();
     if (!configurationFileName || pathDriveId === null || fileDriveId === null) {
+      console.log({ configurationFileName, pathDriveId, fileDriveId });
+      console.log('here');
       throw new NoConfigurationError();
     }
 
@@ -110,8 +113,8 @@ function saveConfigurationProcess({
       };
 
       const articles = vaultIndexStore.articles();
-      const exerciseConfiguration: ValudIndexExerciseConfiguration = {
-        startDate: exerciseStore.startDate().toISOString(),
+      const exerciseConfiguration: VaultIndexExerciseConfiguration = {
+        startDate: dateToISO80601String(exerciseStore.startDate()),
         includeTags: exerciseStore.includeTags(),
         includeTopics: exerciseStore.includeTopics(),
         excludeTags: exerciseStore.excludeTags(),
@@ -145,6 +148,11 @@ function saveConfigurationProcess({
       ]);
 
       driveApi.uploadBlobFile(accessToken, pathDriveId, configurationFileName, data);
+
+      statisticsStore.resetIsUpdated();
+      vaultIndexStore.resetIsUpdated();
+      configurationStore.resetIsUpdated();
+      exerciseStore.resetIsUpdated();
     } catch (error) {
       if (error instanceof DriveApiAuthenticationError) {
         await logoutProcess();

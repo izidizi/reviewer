@@ -126,6 +126,7 @@ export class ResultsService {
     return {
       articleId: articleExerciseStat?.articleId ?? getArticleId(review.path, review.name),
       started: mode === 'new' ? reviewed : articleExerciseStat!.started,
+      startResult: mode === 'new' ? result : articleExerciseStat!.startResult,
       repeates:
         mode === 'repeat'
           ? [...(articleExerciseStat?.repeates ?? []), reviewed]

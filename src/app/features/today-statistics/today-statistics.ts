@@ -1,6 +1,9 @@
 import { Component, inject } from '@angular/core';
 import { StatisticsStore } from '../../store/statistics/statistics.store';
 
+/**
+ * @deprecated remove
+ */
 @Component({
   selector: 'app-today-statistics',
   imports: [],
