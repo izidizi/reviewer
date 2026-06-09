@@ -16,6 +16,7 @@ export const routes: Routes = [
     path: '',
     component: AppTargetLayout,
     children: [
+      { path: '', pathMatch: 'full', redirectTo: '/index' },
       { path: 'vault', canActivate: [noAuthGuard], component: AppVaultComponent },
       { path: 'login', canActivate: [loginGuard], component: AppLoginComponent },
     ],
@@ -25,7 +26,7 @@ export const routes: Routes = [
     component: AppMainLayout,
     canActivate: [noAuthGuard, noVaultGuard],
     children: [
-      { path: '', component: AppIndexComponent },
+      { path: 'index', component: AppIndexComponent },
       { path: 'debug', component: AppDebugComponent },
       { path: 'score', component: AppScoreComponent },
       { path: 'plan', component: AppPlanComponent },
