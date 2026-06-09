@@ -9,72 +9,33 @@ import { AppPlanComponent } from './features/plan/plan';
 import { loginGuard, noAuthGuard, noVaultGuard } from './app-route-guards';
 import { AppIndexComponent } from './features/index';
 import { AppConfigurationComponent } from './features/configuration/configuration';
+import { AppScoreComponent } from './features/score/score';
 
 export const routes: Routes = [
   {
     path: '',
-    canActivate: [noAuthGuard, noVaultGuard],
-    component: AppMainLayout,
-    children: [
-      {
-        path: '',
-        component: AppIndexComponent,
-      },
-    ],
-  },
-  {
-    path: 'debug',
-    component: AppMainLayout,
-    children: [
-      {
-        path: '',
-        component: AppDebugComponent,
-      },
-    ],
-  },
-  {
-    path: 'vault',
-    component: AppTargetLayout,
-    canActivate: [noAuthGuard],
-    children: [
-      {
-        path: '',
-        component: AppVaultComponent,
-      },
-    ],
-  },
-  {
-    path: 'login',
-    canActivate: [loginGuard],
     component: AppTargetLayout,
     children: [
-      {
-        path: '',
-        component: AppLoginComponent,
-      },
+      { path: 'vault', canActivate: [noAuthGuard], component: AppVaultComponent },
+      { path: 'login', canActivate: [loginGuard], component: AppLoginComponent },
     ],
   },
   {
-    path: 'plan',
+    path: '',
     component: AppMainLayout,
     canActivate: [noAuthGuard, noVaultGuard],
-    children: [{ path: '', component: AppPlanComponent }],
-  },
-  {
-    path: 'configuration',
-    component: AppMainLayout,
-    canActivate: [noAuthGuard, noVaultGuard],
-    children: [{ path: '', component: AppConfigurationComponent }],
+    children: [
+      { path: '', component: AppIndexComponent },
+      { path: 'debug', component: AppDebugComponent },
+      { path: 'score', component: AppScoreComponent },
+      { path: 'plan', component: AppPlanComponent },
+      { path: 'configuration', component: AppConfigurationComponent },
+    ],
   },
   {
     path: '**',
     component: AppMainLayout,
     canActivate: [noAuthGuard, noVaultGuard],
-    children: [
-      {
-        path: '',
-        component: AppReviewComponent,
-      },
-    ],
+    children: [{ path: '', component: AppReviewComponent }],
   },
 ];

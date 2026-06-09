@@ -1,17 +1,18 @@
 import { DriveApiService } from '../../../services/drive-api/drive-api.service';
-import { Path } from '../../model/path';
-import { ProcessError, ProcessUnhandledError } from '../../../model/error/process-error';
+import { ProcessError } from '../../../model/error/process-error';
 import { GetDirectoryDriveIdProcess } from '.';
 import { getDriveId } from '../../model/drive-id';
 import { ConfigurationStore } from '../../store/configuration/configuration.store';
 import { logDebug, logError } from '../../../services/debug-logger';
 import { ListFilesResponse } from '../../../services/drive-api/list-files.method';
+import { DriveApiAuthenticationError } from '../../../services/drive-api/drive-api-errors';
+import { UserNotAuthorised } from '../../process-bl';
 
 export class DirectoryNotFound extends ProcessError {
-  constructor(path: Path) {
+  constructor(path: string) {
     super({
-      process: 'GetDirectoryDriveIdProcess',
-      message: `path ${path.join('/')} not found`,
+      process,
+      message: `path ${path} not found`,
     });
   }
 }
@@ -26,17 +27,24 @@ export function getDirectoryDriveId({
 }): GetDirectoryDriveIdProcess {
   return async (accessToken, path) => {
     logDebug(`${process} - start`, { includeStack: true });
+
     let rootId: string | null = configurationStore.vaultRootPathDriveId() ?? 'root';
+    let currentPath: string = '';
 
     for (const pathItem of path) {
-      logDebug(`${process} - list dir`, { entity: pathItem, payload: { pathItem, rootId } });
+      currentPath += pathItem;
+      logDebug(`${process} - list dir`, { entity: currentPath, payload: { currentPath, rootId } });
       const { files } = (await driveApi
         .listFiles(accessToken, rootId ?? 'root')
         .catch((error): never => {
           logError(error, `${process} - failed to list files`, `dir: ${rootId}`);
+          if (error instanceof DriveApiAuthenticationError) {
+            // abort the process
+            throw new UserNotAuthorised();
+          }
 
-          // abort
-          throw new ProcessUnhandledError({ process, cause: error });
+          // abort the process
+          throw new DirectoryNotFound(currentPath);
         })) as ListFilesResponse;
 
       rootId =
@@ -49,7 +57,7 @@ export function getDirectoryDriveId({
     }
 
     // abort
-    if (rootId === null) throw new DirectoryNotFound(path);
+    if (rootId === null) throw new DirectoryNotFound(currentPath);
 
     logDebug(`${process} - finish`);
     return getDriveId(rootId);

@@ -17,6 +17,7 @@ export const DefaultErrorsProcess = new InjectionToken<DefaultErrorsProcess>(
       return async (error) => {
         if (error instanceof UserNotAuthorised || error instanceof UserNotAuthorisedDeprecated) {
           await logoutProcess();
+          await rounter.navigate(['login']);
           return true;
         } else if (error instanceof NoVaultError) {
           await rounter.navigate(['vault']);

@@ -5,9 +5,7 @@
   <button type="button" (click)="test()">Test</button>&nbsp;
   <button type="button" (click)="testMove()">Test move</button>&nbsp;
 
-  <app-today-statistics />
-
-  <h5>{{articleId()}}</h5>
+    <h5>{{articleId()}}</h5>
   <div class="markdown-body">
     <markdown [data]="fileContent()"></markdown>
   </div>
@@ -20,7 +18,6 @@
 
   <app-articles-index />
 
-  <app-month-statistics [month]="4" />
 } @else {
   <app-login/>
 }

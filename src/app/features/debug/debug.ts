@@ -3,7 +3,6 @@ import { MarkdownComponent } from 'ngx-markdown';
 import { AppLoginComponent } from '../login/login';
 import { AppTodayStatisticsComponent } from '../today-statistics/today-statistics';
 import { AppArticlesIndexComponent } from '../articles-index/articles-index';
-import { AppMonthStatisticsComponent } from '../month-statistics/month-statistics';
 import { LoadConfigurationProcess } from '../../processes/load-configuration.process';
 import { SaveConfigufationProcess } from '../../processes/save-configuration.process';
 import { GetFileCapabilitiesProcess } from '../../processes/get-file-capabilities';
@@ -26,14 +25,7 @@ import { logDebug } from '../../../services/debug-logger';
 
 @Component({
   selector: 'app-debug',
-  imports: [
-    MatButtonModule,
-    MarkdownComponent,
-    AppLoginComponent,
-    AppTodayStatisticsComponent,
-    AppArticlesIndexComponent,
-    AppMonthStatisticsComponent,
-  ],
+  imports: [MatButtonModule, MarkdownComponent, AppLoginComponent, AppArticlesIndexComponent],
   templateUrl: './debug.html',
   styleUrl: './debug.scss',
 })

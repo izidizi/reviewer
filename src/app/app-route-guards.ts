@@ -19,6 +19,7 @@ export const noAuthGuard: CanActivateFn = (route, state) => {
   const authStore = inject(AuthStore);
   const router = inject(Router);
 
+  console.log('noAuthGuard');
   logDebug('auth check', {
     includeStack: true,
     entity: `url: ${route.url.map(({ path }) => path).join('/')}`,
@@ -41,6 +42,7 @@ export const noVaultGuard: CanActivateFn = (route, state) => {
   const configurationStore = inject(ConfigurationStore);
   const router = inject(Router);
 
+  console.log('noVaultGuard');
   if (configurationStore.isLoaded()) {
     return true;
   }
