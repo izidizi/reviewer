@@ -7,11 +7,13 @@
         [class]="['material-icons-outlined', article.result]"
       >{{article.reviewed ? 'check_circle' : 'circle'}}</mat-icon>
       <div matListItemTitle>{{article.articleId}}</div>
-      <div matListItemLine>
-        @for (tag of article.tags; track $index) {
-          <app-tag [tag]="tag" />
-        }
-      </div>
+      @if (article.tags.length > 0) {
+        <div matListItemLine class="tags">
+          @for (tag of article.tags; track $index) {
+            <app-tag [tag]="tag" />
+          }
+        </div>
+      }
     </a>
   }
 </mat-list>
@@ -25,11 +27,13 @@
         [class]="['material-icons-outlined', article.result]"
       >{{article.reviewed ? 'check_circle' : 'circle'}}</mat-icon>
       <div matListItemTitle>{{article.articleId}}</div>
-      <div matListItemLine>
-        @for (tag of article.tags; track $index) {
-          <app-tag [tag]="tag" />
-        }
-      </div>
+      @if (article.tags.length > 0) {
+        <div matListItemLine>
+          @for (tag of article.tags; track $index) {
+            <app-tag [tag]="tag" />
+          }
+        </div>
+      }
     </a>
   }
 </mat-list>
@@ -43,11 +47,13 @@
         [class]="['material-icons-outlined', article.result]"
       >{{article.reviewed ? 'check_circle' : 'circle'}}</mat-icon>
       <div matListItemTitle>{{article.articleId}}</div>
-      <div matListItemLine>
-        @for (tag of article.tags; track $index) {
-          <app-tag [tag]="tag" />
-        }
-      </div>
+      @if (article.tags.length > 0) {
+        <div matListItemLine>
+          @for (tag of article.tags; track $index) {
+            <app-tag [tag]="tag" />
+          }
+        </div>
+      }
     </a>
   }
 </mat-list>

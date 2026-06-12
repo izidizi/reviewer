@@ -20,6 +20,6 @@
     <app-review-buttons [result]="reviewResult()" (select)="selectResult($event)" />
   </mat-toolbar-row>
 </mat-toolbar>
-<div class="markdown-body dark">
+<div class="markdown-body" [class]="themeClass()">
   <markdown mermaid katex [data]="articleContent()"></markdown>
 </div>

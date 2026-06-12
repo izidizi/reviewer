@@ -30,6 +30,6 @@ export class App implements OnInit {
 
   ngOnInit(): void {
     // this.themeService.colorSchemeLight();
-    // this.themeService.colorSchemeDark();
+    this.themeService.colorSchemeDark();
   }
 }

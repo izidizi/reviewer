@@ -27,7 +27,7 @@ export function findArticles(
 }
 
 function haveIntersection(listA: string[], listB: string[]): boolean {
-  for (const itemA in listA) {
+  for (const itemA of listA) {
     if (listB.includes(itemA)) return true;
   }
 

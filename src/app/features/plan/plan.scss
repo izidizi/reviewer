@@ -1,5 +1,17 @@
+@use '@angular/material' as mat;
+
 h3 {
   margin-bottom: 0; }
+
+.tags {
+  margin: 0 0 0.5rem;
+
+  @include mat.button-overrides((
+    outlined-container-height: 1.5rem,
+  ));
+}
+
+
 
 .positive {
   --mat-list-list-item-leading-icon-color: green;

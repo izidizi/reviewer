@@ -1,3 +1,5 @@
+import { isSignal, Signal } from '@angular/core';
+
 export type DebugLogRecord = {
   timestamp: number;
   severity: 'debug' | 'info' | 'warning' | 'error';
@@ -19,9 +21,16 @@ export type StackRecord = {
 };
 
 const logRecords: DebugLogRecord[] = [];
+const states: { [name: string]: Signal<unknown> | undefined } = {};
 
-export function clearLog() {
-  logRecords.length = 0;
+export function registerStore(
+  name: string,
+  store: { [name: string]: (...args: any[]) => unknown },
+) {
+  Object.keys(store).forEach((key) => {
+    const item = store[key];
+    if (isSignal(item)) states[`${name} -> ${key}`] = item;
+  });
 }
 
 export function logDebug(
@@ -51,9 +60,10 @@ export function logWarning(
 ) {
   log({ severity: 'warning', place, entity, message, payload });
 }
-export function logError(error: unknown, place: string, entity?: string) {
+export function logError<T>(error: T, place: string, entity?: string): T {
   const message = error instanceof Error ? error.message : String(error);
   log({ severity: 'error', place, entity, message, payload: error, includeStack: true });
+  return error;
 }
 export function logAction(
   title: string,
@@ -135,9 +145,9 @@ export function logToConsole(
 
       if (mode === 'brief') {
         const briefAddtionalInfo = record.message
-          ? `(M:${record.message})`
+          ? `(M>${record.message})`
           : record.entity
-            ? `(E:${record.entity})`
+            ? `(E>${record.entity})`
             : '';
         console.log(
           `%c${dTSFormatted}| %c[#${recordIndex.toString().padStart(3, '0')}] %c${record.place} %c${briefAddtionalInfo}`,
@@ -167,6 +177,9 @@ export function logToConsole(
           `color: ${color};font-style: italic`,
         );
         console.log(rP, record.payload);
+        if (record.payload instanceof Error) {
+          console.log(record.payload.cause ?? rP + '[no cause]');
+        }
         console.log('');
       }
     }
@@ -273,9 +286,11 @@ function parseCallStackLine(text: string): StackRecord {
 }
 
 type GlobalLogger = {
+  logClear: () => void;
   logToConsole: () => void;
   logToConsoleBrief: (fromIndex?: number, count?: number) => void;
   logToConsoleRecord: (recordIndex: number) => void;
+  $state: (filter?: string | string[]) => { [name: string]: unknown };
 };
 const safeWindow = (globalThis ?? window) as unknown as GlobalLogger;
 safeWindow.logToConsole = logToConsole;
@@ -290,4 +305,22 @@ safeWindow.logToConsoleBrief = (fromIndex, count) => {
 };
 safeWindow.logToConsoleRecord = (index) => {
   return logToConsole({ mode: 'full', aroundIndex: [index], aroundIndexCount: 1 });
+};
+safeWindow.logClear = () => {
+  logRecords.length = 0;
+};
+safeWindow.$state = (filter) => {
+  let result: Array<[string, Signal<unknown> | undefined]> = Object.keys(states).map((name) => [
+    name,
+    states[name]!,
+  ]);
+  if (Array.isArray(filter)) {
+    result = result.filter((tuple) => (!!filter ? filter.includes(tuple[0]) : true));
+  } else {
+    result = result.filter((tuple) => (!!filter ? tuple[0].toString().startsWith(filter) : true));
+  }
+
+  return result
+    .filter((tuple): tuple is [string, Signal<unknown>] => !!tuple[1])
+    .reduce((result, [name, state]) => ({ ...result, [name]: state() }), {});
 };

@@ -7,7 +7,7 @@ import JSZip from 'jszip';
 export class ZipService {
   async extractAllJSON(zip: unknown): Promise<{ [file: string]: unknown }> {
     const result: { [file: string]: unknown } = {};
-    const contents = await JSZip.loadAsync(zip);
+    const contents = await JSZip.loadAsync(zip as any);
 
     for (const filename of Object.keys(contents.files).filter(
       (fileName) => fileName.slice(-5) === '.json',

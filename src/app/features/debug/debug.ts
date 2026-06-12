@@ -1,4 +1,4 @@
-import { Component, effect, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, effect, inject, OnInit, signal } from '@angular/core';
 import { MarkdownComponent } from 'ngx-markdown';
 import { AppLoginComponent } from '../login/login';
 import { AppTodayStatisticsComponent } from '../today-statistics/today-statistics';
@@ -22,6 +22,7 @@ import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { VaultIndexAllProcess } from '../../processes/vault';
 import { logDebug } from '../../../services/debug-logger';
+import { useBodySize } from '../../helpers';
 
 @Component({
   selector: 'app-debug',
@@ -163,4 +164,19 @@ export class AppDebugComponent implements OnInit {
   }
 
   ngOnInit(): void {}
+
+  readonly bodySize = useBodySize();
+  readonly bodyWidth = computed(() => {
+    const { width } = this.bodySize();
+    return width;
+  });
+  readonly bodyHeight = computed(() => {
+    const { height } = this.bodySize();
+    return height;
+  });
+
+  reload() {
+    const uri = globalThis.location.origin;
+    globalThis.location.href = uri + '?t=' + new Date().getTime().toString();
+  }
 }

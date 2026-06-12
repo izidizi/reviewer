@@ -85,15 +85,7 @@ export class ResultsService {
     };
     total[result] += 1;
 
-    const reviewStartTS = new Date('2026-01-01T00:00:00.000Z');
-    const lastReviewInterval_days =
-      (articleStatistics?.lastReview ?? reviewStartTS) < reviewed
-        ? (reviewed.getTime() - (articleStatistics?.lastReview ?? reviewStartTS).getTime()) /
-          1000 /
-          60 /
-          60 /
-          24
-        : articleStatistics!.lastReviewInterval_days;
+    const lastReviewInterval_days = (Date.now() - lastReview.getTime()) / 1000 / 60 / 60 / 24;
 
     return {
       articleId: articleStatistics?.articleId ?? getArticleId(review.path, review.name),

@@ -21,6 +21,7 @@ import { ReviewProcess } from '../../processes/review';
 import { ParseArticleIdBL } from '../../process-bl';
 import { NotificationService } from '../../services/notification.service';
 import { LoadArticleContentLogic } from './logics/get-article-content';
+import { ThemeService } from '../../../services/theme/theme.service';
 
 @Component({
   selector: 'app-review',
@@ -38,6 +39,7 @@ import { LoadArticleContentLogic } from './logics/get-article-content';
 export class AppReviewComponent implements OnInit {
   readonly router = inject(Router);
 
+  readonly themeService = inject(ThemeService);
   readonly vaultIndexStore = inject(VaultIndexStore);
   readonly statisticsStore = inject(StatisticsStore);
   readonly notificationService = inject(NotificationService);
@@ -46,6 +48,11 @@ export class AppReviewComponent implements OnInit {
   readonly loadArticleContentLogic = inject(LoadArticleContentLogic);
 
   readonly urlTree = this.router.parseUrl(this.router.url);
+
+  readonly themeClass = computed(() => {
+    const colorScheme = this.themeService.colorScheme();
+    return colorScheme === 'dark' ? 'dark' : '';
+  });
 
   /**
    * articleId

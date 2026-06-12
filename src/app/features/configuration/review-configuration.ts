@@ -146,12 +146,16 @@ export class AppReviewConfigurationComponent {
     if (this.reviewConfigurationForm.valid) {
       logAction('save vault configuration form', place);
       const startDate = new Date(this.reviewConfigurationForm.get('startDate')?.value);
+      const includeTags = this.reviewConfigurationForm.get('includeTags')?.value;
+      const includeTopics = this.reviewConfigurationForm.get('includeTopics')?.value;
+      const excludeTags = this.reviewConfigurationForm.get('excludeTags')?.value;
+      const excludeTopics = this.reviewConfigurationForm.get('excludeTopics')?.value;
       this.exerciseStore.patchConfiguration({
         startDate,
-        includeTags: this.reviewConfigurationForm.get('includeTags')?.value,
-        includeTopics: this.reviewConfigurationForm.get('includeTopics')?.value,
-        excludeTags: this.reviewConfigurationForm.get('excludeTags')?.value,
-        excludeTopics: this.reviewConfigurationForm.get('excludeTopics')?.value,
+        includeTags: commaSeparatedValueToArray(includeTags),
+        includeTopics: commaSeparatedValueToArray(includeTopics),
+        excludeTags: commaSeparatedValueToArray(excludeTags),
+        excludeTopics: commaSeparatedValueToArray(excludeTopics),
         newArticlesPerDay: this.reviewConfigurationForm.get('newArticlesPerDay')?.value,
         repeatTimes: this.reviewConfigurationForm.get('repeatTimes')?.value,
       });
@@ -174,12 +178,17 @@ export class AppReviewConfigurationComponent {
 
     this.reviewConfigurationForm.patchValue({
       startDate,
-      includeTags: this.exerciseStore.includeTags(),
-      excludeTags: this.exerciseStore.excludeTags(),
-      includeTopics: this.exerciseStore.includeTopics(),
-      excludeTopics: this.exerciseStore.excludeTopics(),
+      includeTags: this.exerciseStore.includeTags().join(', '),
+      excludeTags: this.exerciseStore.excludeTags().join(', '),
+      includeTopics: this.exerciseStore.includeTopics().join(', '),
+      excludeTopics: this.exerciseStore.excludeTopics().join(', '),
       newArticlesPerDay: this.exerciseStore.newArticlesPerDay(),
       repeatTimes: this.exerciseStore.repeatTimes(),
     });
   }
+}
+
+function commaSeparatedValueToArray(value?: string | null): string[] {
+  if (!value) return [];
+  return value.split(',').map((item) => item.trim());
 }

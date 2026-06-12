@@ -65,7 +65,8 @@ export function createTodaysPlanProcess({
       .filter(
         ({ articleId }) =>
           exerciseStatistics[articleId]?.started &&
-          exerciseStatistics[articleId]?.startResult !== ReviewResultPositive &&
+          !isToday(exerciseStatistics[articleId]?.started) &&
+          // exerciseStatistics[articleId]?.startResult !== ReviewResultPositive &&
           exerciseStatistics[articleId]?.repeates.length < configuration.repeatTimes,
       )
       .sort(({ articleId: idA }, { articleId: idB }) =>

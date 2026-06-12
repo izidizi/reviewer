@@ -1,12 +1,26 @@
 /* You can add global styles to this file, and also import other style files */
 // @import '@angular/material/prebuilt-themes/azure-blue.css';
 // @import '@angular/material/prebuilt-themes/indigo-pink.css';
-@import '@angular/material/prebuilt-themes/purple-green.css';
+// @import '@angular/material/prebuilt-themes/purple-green.css';
+@use '@angular/material' as mat;
 
-html, body {
-  height: 100%;
+html, body { height: 100dvh; }
+body {
   margin: 0;
   padding: 0;
   overflow: hidden;
   font-family: Roboto, 'Helvetica Neue', sans-serif;
+  background: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+}
+
+:root {
+  @include mat.theme((
+    color: (
+      primary: mat.$azure-palette,
+      tertiary: mat.$orange-palette,
+    ),
+    typography: Roboto,
+    density: 0,
+  ))
 }

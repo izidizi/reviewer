@@ -34,17 +34,11 @@ export const ConfigurationStore = signalStore(
     onInit: () => {
       const configurationPathKey = 'vaultPath';
       const vaultPath = localStorage.getItem(configurationPathKey);
-      if (!vaultPath) {
-        console.log('no app configuration found');
-        return;
-      }
+      if (!vaultPath) return;
       const path = parsePath(vaultPath);
       const configurationPath = path.slice(0, -1);
       const configurationName = path.pop();
-      if (!configurationName) {
-        console.log('no app configuration found (name)');
-        return;
-      }
+      if (!configurationName) return;
 
       store.setInitialConfiguration(configurationPath, configurationName);
 

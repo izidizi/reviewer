@@ -5,12 +5,29 @@
   justify-content: center;
   align-items: center; }
 
+.markdown-body {
+  padding: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--mat-sys-surface), var(--mat-sys-on-surface) 10%);
+  border-radius: 3px;
+  --bgColor-default: color-mix(in srgb, var(--mat-sys-surface), var(--mat-sys-on-surface) 5%);
+}
+
 .markdown-body.dark {
   color-scheme: dark;
 
-  --fgColor-default: #f0f6fc;
-  --bgColor-default: #0d1117;
+  --fgColor-default: var(--mat-sys-on-surface);
 
-  --fgColor-muted: #8b949e;
+  --fgColor-muted: #1b1b1b;
   --borderColor-default: #30363d;
+
+  & ::ng-deep pre  {
+    color: var(--mat-sys-on-surface);
+    background-color: var(--mat-sys-surface);
+
+    code {
+      color: var(--mat-sys-on-surface);
+    }
+    code, .token {
+      text-shadow: none; }
+  }
 }

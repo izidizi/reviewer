@@ -8,5 +8,5 @@ export type VaultArticleStatistics = {
   };
   lastReview: Date;
   lastResult: ReviewResult;
-  lastReviewInterval_days: number | null;
+  lastReviewInterval_days: number;
 };

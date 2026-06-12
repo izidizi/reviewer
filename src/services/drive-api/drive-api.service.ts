@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { effect, inject, Injectable } from '@angular/core';
 import { initScriptFactory } from './init-script.method';
 import { initClientFactory } from './init-client.method';
 import { requestAccessTokenFactory } from './request-access-token.method';
@@ -10,8 +10,10 @@ import { getBinaryFileContentFactory } from './get-binary-file-content';
 import { patchBlobFileFactory as uploadBlobFileFactory } from './patch-blob-file.method';
 import { deleteFileFactory } from './delete-file.method';
 import { getFileCapabilitiesFactory } from './get-file-capabilities';
+import { ConfigurationService } from '../configuration.service';
 
 export type DriveApiServiceState = {
+  client_id: string | null;
   scriptReady: boolean;
   tokenClient: google.accounts.oauth2.TokenClient | null;
   accessTokenCallbackFn: ((payload: { token: string } | { error: string }) => void) | null;
@@ -21,11 +23,21 @@ export type DriveApiServiceState = {
   providedIn: 'root',
 })
 export class DriveApiService {
+  readonly configurationService = inject(ConfigurationService);
+
   readonly #state: DriveApiServiceState = {
+    client_id: null,
     scriptReady: false,
     tokenClient: null,
     accessTokenCallbackFn: null,
   };
+
+  readonly configurationEffect = effect(() => {
+    try {
+      const client_id = this.configurationService.client_id();
+      this.#state.client_id = client_id;
+    } catch {}
+  });
 
   public get isScriptReady(): boolean {
     return this.#state.scriptReady;

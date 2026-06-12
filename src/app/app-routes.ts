@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { AppDebugComponent } from './features/debug/debug';
-import { AppReviewComponent } from './features/review/review';
 import { AppTargetLayout } from './layouts/target/target.layout';
 import { AppLoginComponent } from './features/login/login';
 import { AppVaultComponent } from './features/vault/vault';
@@ -16,7 +15,7 @@ export const routes: Routes = [
     path: '',
     component: AppTargetLayout,
     children: [
-      { path: '', pathMatch: 'full', redirectTo: '/index' },
+      { path: '', pathMatch: 'full', redirectTo: '/plan' },
       { path: 'vault', canActivate: [noAuthGuard], component: AppVaultComponent },
       { path: 'login', canActivate: [loginGuard], component: AppLoginComponent },
     ],
@@ -37,6 +36,11 @@ export const routes: Routes = [
     path: '**',
     component: AppMainLayout,
     canActivate: [noAuthGuard, noVaultGuard],
-    children: [{ path: '', component: AppReviewComponent }],
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./features/review/review').then((m) => m.AppReviewComponent),
+      },
+    ],
   },
 ];

@@ -160,7 +160,7 @@ function saveConfigurationProcess({
       }
       console.warn(error);
 
-      throw new ProcessUnhandledError({ process: 'LoadConfigurationProcess', cause: error });
+      throw new ProcessUnhandledError({ process: 'SaveConfigufationProcess', cause: error });
     }
   };
 }

@@ -7,8 +7,8 @@
 
 .layout-main {
   width: 100%;
-  min-height: 100vh;
-  height: 100vh;
+  min-height: 100%;
+  height: 100%;
   display: grid;
   grid-template-rows: 1fr auto;
   overflow: hidden;
@@ -24,5 +24,13 @@
   .footer {
     width: 100%;
     align-self: end;
+  }
+}
+
+@media (pointer: coarse) {
+  .layout-main {
+    .footer {
+      padding-bottom: 1rem;
+      padding-bottom: calc(env(safe-area-inset-bottom)); }
   }
 }
