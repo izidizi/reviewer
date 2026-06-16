@@ -5,7 +5,6 @@ export interface ConfigurationSlice {
   vaultRootPath: Path;
   vaultRootPathDriveId: DriveId | null;
   vaultConfigurationName: string | null;
-  vaultConfigurationDriveId: DriveId | null;
   isLoaded: boolean;
   isUpdated: boolean;
   path: Path;
@@ -15,7 +14,6 @@ export const initialConfigurationSlice: ConfigurationSlice = {
   vaultRootPath: [],
   vaultRootPathDriveId: null,
   vaultConfigurationName: null,
-  vaultConfigurationDriveId: null,
   isUpdated: false,
   isLoaded: false,
   path: [],

@@ -28,7 +28,7 @@
       >{{article.reviewed ? 'check_circle' : 'circle'}}</mat-icon>
       <div matListItemTitle>{{article.articleId}}</div>
       @if (article.tags.length > 0) {
-        <div matListItemLine>
+        <div matListItemLine class="tags">
           @for (tag of article.tags; track $index) {
             <app-tag [tag]="tag" />
           }
@@ -48,7 +48,7 @@
       >{{article.reviewed ? 'check_circle' : 'circle'}}</mat-icon>
       <div matListItemTitle>{{article.articleId}}</div>
       @if (article.tags.length > 0) {
-        <div matListItemLine>
+        <div matListItemLine class="tags">
           @for (tag of article.tags; track $index) {
             <app-tag [tag]="tag" />
           }

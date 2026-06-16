@@ -14,7 +14,7 @@ export const setInitialConfiguration: (
 
 export type LoadConfigurationData = Pick<
   ConfigurationSlice,
-  'vaultRootPath' | 'vaultRootPathDriveId' | 'vaultConfigurationName' | 'vaultConfigurationDriveId'
+  'vaultRootPath' | 'vaultConfigurationName' | 'vaultRootPathDriveId'
 >;
 export const loadConfiguration: (
   data: LoadConfigurationData,
@@ -22,13 +22,11 @@ export const loadConfiguration: (
   vaultRootPath,
   vaultRootPathDriveId,
   vaultConfigurationName,
-  vaultConfigurationDriveId,
 }) => {
   return () => ({
     vaultRootPath,
     vaultRootPathDriveId,
     vaultConfigurationName,
-    vaultConfigurationDriveId,
     isLoaded: true,
   });
 };

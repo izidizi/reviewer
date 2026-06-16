@@ -13,6 +13,7 @@ import { isValidDate } from '../../../model/utils/invalid-date';
 import { StatisticsStore } from '../../store/statistics/statistics.store';
 import { VaultArticleStatistics } from '../../model/vault-article-statistics';
 import { ArticleDetailsComponent } from './components/article-details';
+import { getOverallScore } from './bl/get-overall-score';
 
 type IndexRecord = {
   position: number;
@@ -21,6 +22,7 @@ type IndexRecord = {
   indexed: string;
   totalReviewed: number;
   overallScore: string;
+  overallScoreClass: string;
 };
 
 @Component({
@@ -61,6 +63,8 @@ export class AppIndexComponent implements OnInit {
     this.dataSource.data = Array.from(articlesSet.values()).map((articleId, index) => {
       const article = this.vaultIndexStore.articles()[articleId];
       const statistics = this.statisticsStore.articles()[articleId];
+      const { overallScore, overallScoreClass } = getOverallScore(statistics);
+
       return {
         position: index + 1,
         exists: !!article,
@@ -73,8 +77,9 @@ export class AppIndexComponent implements OnInit {
             statistics.total.negative +
             statistics.total.unknown
           : 0,
-        overallScore: 'warning_amber',
+        overallScore,
         // overallScore: ['priority_high', 'warning_amber', 'thumb_up'][Math.floor(Math.random() * 3)],
+        overallScoreClass,
         tags: article?.tags ?? [],
         topics: article?.topics ?? [],
       };

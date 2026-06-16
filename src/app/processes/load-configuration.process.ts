@@ -16,8 +16,8 @@ import { StatisticsStore } from '../store/statistics/statistics.store';
 import { ExerciseSlice, initialExerciseSlice } from '../store/exercise/exercise.slice';
 import { ExerciseStore } from '../store/exercise/exercise.store';
 import { logDebug, logError } from '../../services/debug-logger';
-import { GetDirectoryDriveIdProcess } from './vault';
 import { CheckAuthBL } from '../process-bl';
+import { GetDirectoryDriveIdProcess } from './drive';
 
 export class RootPathNotDefined extends ProcessError {
   constructor() {
@@ -146,7 +146,6 @@ function loadConfigurationProcess({
       vaultRootPath: path,
       vaultRootPathDriveId: getDriveId(rootId!),
       vaultConfigurationName: fileName,
-      vaultConfigurationDriveId: getDriveId(configurationFile.id),
     });
 
     try {

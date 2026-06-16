@@ -14,13 +14,13 @@ h3 {
 
 
 .positive {
-  --mat-list-list-item-leading-icon-color: green;
-  --mat-list-list-item-hover-leading-icon-color: green; }
+  --mat-list-list-item-leading-icon-color: var(--color-good);
+  --mat-list-list-item-hover-leading-icon-color: var(--color-good); }
 
 .incomplete {
-  --mat-list-list-item-leading-icon-color: orange;
-  --mat-list-list-item-hover-leading-icon-color: orange; }
+  --mat-list-list-item-leading-icon-color: var(--color-normal);
+  --mat-list-list-item-hover-leading-icon-color: var(--color-normal); }
 
 .negative {
-  --mat-list-list-item-leading-icon-color: red;
-  --mat-list-list-item-hover-leading-icon-color: red; }
+  --mat-list-list-item-leading-icon-color: var(--color-bad);
+  --mat-list-list-item-hover-leading-icon-color: var(--color-bad); }

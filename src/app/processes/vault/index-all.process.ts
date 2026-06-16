@@ -10,9 +10,10 @@ import { ConfigurationStore } from '../../store/configuration/configuration.stor
 import { VaultIndexSlice } from '../../store/vault-index/vault-index.slice';
 import { ArticleService } from '../../../services/article/article.service';
 import { VaultIndexStore } from '../../store/vault-index/vault-index.store';
-import { GetDirectoryDriveIdProcess, VaultIndexAllProcess } from '.';
+import { VaultIndexAllProcess } from '.';
 import { CheckAuthBL, UserNotAuthorised } from '../../process-bl';
 import { logError, logWarning } from '../../../services/debug-logger';
+import { GetDirectoryDriveIdProcess } from '../drive';
 
 const process = 'VaultIndexAllProcess';
 export function vaultIndexAllProcess({

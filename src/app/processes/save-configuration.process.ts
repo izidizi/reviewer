@@ -17,6 +17,8 @@ import { StatisticsStore } from '../store/statistics/statistics.store';
 import { ExerciseStore } from '../store/exercise/exercise.store';
 import { dateToISO80601String } from '../../model/utils';
 import { file } from 'jszip';
+import { GetFileDriveIdProcess } from './drive';
+import { assertValidVaultFile } from '../model/vault-file';
 
 export class NoConfigurationError extends ProcessError {
   constructor() {
@@ -50,6 +52,7 @@ export const SaveConfigufationProcess = new InjectionToken<SaveConfigufationProc
       const exerciseStore = inject(ExerciseStore);
       const logoutProcess = inject(LogoutProcess);
       const checkAuthProcess = inject(CheckAuthProcess);
+      const getFileDriveId = inject(GetFileDriveIdProcess);
 
       return saveConfigurationProcess({
         zipService,
@@ -60,6 +63,7 @@ export const SaveConfigufationProcess = new InjectionToken<SaveConfigufationProc
         exerciseStore,
         logoutProcess,
         checkAuthProcess,
+        getFileDriveId,
       });
     },
   },
@@ -74,6 +78,7 @@ function saveConfigurationProcess({
   exerciseStore,
   logoutProcess,
   checkAuthProcess,
+  getFileDriveId,
 }: {
   zipService: ZipService;
   driveApi: DriveApiService;
@@ -83,6 +88,7 @@ function saveConfigurationProcess({
   exerciseStore: ExerciseStore;
   logoutProcess: LogoutProcess;
   checkAuthProcess: CheckAuthProcess;
+  getFileDriveId: GetFileDriveIdProcess;
 }): SaveConfigufationProcess {
   return async () => {
     const accessToken = await checkAuthProcess();
@@ -93,12 +99,13 @@ function saveConfigurationProcess({
 
     const configurationFileName = configurationStore.vaultConfigurationName();
     const pathDriveId = configurationStore.vaultRootPathDriveId();
-    const fileDriveId = configurationStore.vaultConfigurationDriveId();
-    if (!configurationFileName || pathDriveId === null || fileDriveId === null) {
-      console.log({ configurationFileName, pathDriveId, fileDriveId });
-      console.log('here');
+    if (!configurationFileName || pathDriveId === null) {
       throw new NoConfigurationError();
     }
+    assertValidVaultFile(configurationFileName);
+
+    const { fileDriveId } = await getFileDriveId(accessToken, [], configurationFileName);
+    console.log('fileDriveId', fileDriveId);
 
     try {
       const capabilities = await driveApi.getFileCapabilities(accessToken, fileDriveId);

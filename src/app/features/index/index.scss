@@ -61,3 +61,21 @@ tr.article-row:not(.expanded-article-row):active {
 .toggle-button-expanded {
   transform: rotate(180deg);
 }
+
+.awesome {
+  color: var(--color-awesome) }
+
+.good {
+  color: var(--color-good) }
+
+.normal, .no-score {
+  color: var(--color-normal) }
+
+.bad {
+  color: var(--color-bad) }
+
+  app-index-toolbar {
+    display: block;
+    position: sticky;
+    top: 0;
+    z-index: 10; }

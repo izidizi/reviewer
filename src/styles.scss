@@ -4,11 +4,9 @@
 // @import '@angular/material/prebuilt-themes/purple-green.css';
 @use '@angular/material' as mat;
 
-html, body { height: 100dvh; }
 body {
   margin: 0;
   padding: 0;
-  overflow: hidden;
   font-family: Roboto, 'Helvetica Neue', sans-serif;
   background: var(--mat-sys-surface);
   color: var(--mat-sys-on-surface);
@@ -23,4 +21,17 @@ body {
     typography: Roboto,
     density: 0,
   ))
+}
+
+:root {
+  --color-bad: red;
+  --color-normal: orange;
+  --color-good: green;
+  --color-awesome: magenta;
+
+
+  --layout-content-width: 100%;
+
+  @media screen and (min-width: 768px) {
+    --layout-content-width: 768px; }
 }

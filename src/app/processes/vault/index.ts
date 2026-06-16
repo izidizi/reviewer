@@ -1,26 +1,16 @@
 import { inject, InjectionToken } from '@angular/core';
 import { DriveApiService } from '../../../services/drive-api/drive-api.service';
-import { LogoutProcess } from '../logout.process';
 import { CheckAuthProcess } from '../check-auth.process';
-import { Path } from '../../model/path';
-import { ProcessError } from '../../../model/error/process-error';
 import { ConfigurationStore } from '../../store/configuration/configuration.store';
 import { ArticleService } from '../../../services/article/article.service';
 import { VaultIndexStore } from '../../store/vault-index/vault-index.store';
 import { vaultIndexAllProcess } from './index-all.process';
 import { valutlIndexMissingProcess } from './index-missing.process';
-import { DriveId } from '../../model/drive-id';
-import { getDirectoryDriveId } from './get-directory-id.process';
 import { DecisionTableService } from '../../../services/decision-table.service';
 import { ArticleId } from '../../model/article-id';
 import { vaultIndexArticleProcess } from './index-article.process';
 import { CheckAuthBL, ParseArticleIdBL } from '../../process-bl';
-
-export class RootPathNotFound extends ProcessError {
-  constructor(path: Path) {
-    super({ process: 'IndexVaultProcess', message: `root path ${path.join('/')} not found` });
-  }
-}
+import { GetDirectoryDriveIdProcess } from '../drive';
 
 export type VaultIndexAllProcess = () => Promise<void>;
 export const VaultIndexAllProcess = new InjectionToken<VaultIndexAllProcess>(
@@ -97,23 +87,6 @@ export const VaultIndexArticleProcess = new InjectionToken<VaultIndexArticleProc
         checkAuth,
         getDirectoryDriveIdProcess,
         parseArticleId,
-      });
-    },
-  },
-);
-
-export type GetDirectoryDriveIdProcess = (accessToken: string, path: Path) => Promise<DriveId>;
-export const GetDirectoryDriveIdProcess = new InjectionToken<GetDirectoryDriveIdProcess>(
-  'GetDirectoryDriveIdProcess',
-  {
-    providedIn: 'root',
-    factory: () => {
-      const driveApi = inject(DriveApiService);
-      const configurationStore = inject(ConfigurationStore);
-
-      return getDirectoryDriveId({
-        driveApi,
-        configurationStore,
       });
     },
   },

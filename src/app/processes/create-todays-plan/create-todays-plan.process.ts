@@ -73,12 +73,7 @@ export function createTodaysPlanProcess({
         exerciseStatistics[idA]!.started < exerciseStatistics[idB]!.started ? -1 : 1,
       );
     const todayRepeat = repeatArticles
-      .slice(
-        0,
-        alreadyDoneRepeat > configuration.newArticlesPerDay
-          ? 0
-          : configuration.newArticlesPerDay - alreadyDoneRepeat,
-      )
+      .slice(0, configuration.newArticlesPerDay)
       .map(({ articleId }) => articleId);
 
     // consolidate

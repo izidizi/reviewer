@@ -52,7 +52,7 @@
     <th mat-header-cell *matHeaderCellDef> Score </th>
     <td mat-cell *matCellDef="let record">
       <mat-icon
-        class="material-icons-outlined"
+        class="material-icons-outlined" [class]="record.overallScoreClass"
       >{{record.overallScore}}</mat-icon>
     </td>
   </ng-container>

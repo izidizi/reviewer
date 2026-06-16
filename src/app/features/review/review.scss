@@ -25,9 +25,10 @@
     background-color: var(--mat-sys-surface);
 
     code {
-      color: var(--mat-sys-on-surface);
-    }
+      color: var(--mat-sys-on-surface); }
     code, .token {
       text-shadow: none; }
+    .token.operator {
+      background-color: transparent; }
   }
 }

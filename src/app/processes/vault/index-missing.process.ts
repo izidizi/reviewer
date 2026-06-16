@@ -1,12 +1,10 @@
 import { DriveApiService } from '../../../services/drive-api/drive-api.service';
-import { LogoutProcess } from '../logout.process';
 import { CheckAuthProcess } from '../check-auth.process';
 import { ConfigurationStore } from '../../store/configuration/configuration.store';
 import { ArticleService } from '../../../services/article/article.service';
 import { VaultIndexStore } from '../../store/vault-index/vault-index.store';
-import { GetDirectoryDriveIdProcess, VaultIndexMissingProcess } from '.';
+import { VaultIndexMissingProcess } from '.';
 import { Path } from '../../model/path';
-import { ProcessUnhandledError } from '../../../model/error/process-error';
 import {
   DriveApiAuthenticationError,
   DriveApiFileNotFoundError,
@@ -18,6 +16,7 @@ import { isValidDate } from '../../../model/utils/invalid-date';
 import { VaultArticle } from '../../model/vault-article';
 import { logDebug, logError } from '../../../services/debug-logger';
 import { UserNotAuthorised } from '../../process-bl';
+import { GetDirectoryDriveIdProcess } from '../drive';
 
 const process = 'VaultIndexMissingProcess';
 export function valutlIndexMissingProcess({

@@ -4,28 +4,54 @@
   flex-direction: column;
   gap: 1rem;
   align-items: center;
-  justify-content: center;
+  justify-content: center; }
+
+app-month-statistics {
+  --day-block-font-size: 1.4rem;
+  --day-block-size: 2rem;
+  --day-block-gap: 3px;
+  @media screen and (max-width: 400px) {
+    --day-block-font-size: 1rem;
+    --day-block-size: 1.2rem;
+    --day-block-gap: 3px; }
 }
 
 app-month-statistics ::ng-deep {
   h3 {
-    margin-bottom: 0;
-  }
+    margin-bottom: 0; }
+
   .month {
-    width: 182px;
+    width: calc(var(--day-block-size) * 7 + var(--day-block-gap) * 7 * 3 );
 
     .day {
-      margin: 2px;
+      margin: var(--day-block-gap);
       display: inline-block;
-      width: 20px;
-      height: 20px;
+      width: var(--day-block-size);
+      height: var(--day-block-size);
+      line-height: var(--day-block-size);
+      font-size: var(--day-block-font-size);
       text-align: center;
-      border: thin solid grey;
+      border: thin solid black;
 
       &.today {
-        background: wheat;
-        color: black;
-      }
+        color: var(--mat-sys-on-surface) !important;
+        border: thin solid var(--mat-sys-on-surface) !important; }
+
+      &.work-day {
+        border: thin solid grey; }
+
+      &.reviewed-bad {
+        color:  var(--color-bad);
+        border: thin solid  var(--color-bad); }
+      &.reviewed-normal {
+        color:  var(--color-normal);
+        border: thin solid var(--color-normal); }
+      &.reviewed-good {
+        color: var(--color-good);
+        border: thin solid var(--color-good); }
+      &.reviewed-awesome {
+        color:  var(--color-awesome);
+        border: thin solid  var(--color-awesome); }
     }
   }
 }

@@ -1,7 +1,7 @@
 import { DriveApiService } from '../../../services/drive-api/drive-api.service';
 import { ArticleService } from '../../../services/article/article.service';
 import { VaultIndexStore } from '../../store/vault-index/vault-index.store';
-import { GetDirectoryDriveIdProcess, VaultIndexArticleProcess } from '.';
+import { VaultIndexArticleProcess } from '.';
 import { ProcessError, ProcessUnhandledError } from '../../../model/error/process-error';
 import {
   DriveApiAuthenticationError,
@@ -11,6 +11,7 @@ import {
 import { CheckAuthBL, ParseArticleIdBL, UserNotAuthorised } from '../../process-bl';
 import { DriveId } from '../../model/drive-id';
 import { logDebug, logError } from '../../../services/debug-logger';
+import { GetDirectoryDriveIdProcess } from '../drive';
 
 export class ArticleNotFoundError extends ProcessError {
   constructor(entity: string) {

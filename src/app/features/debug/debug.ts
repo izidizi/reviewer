@@ -73,25 +73,6 @@ export class AppDebugComponent implements OnInit {
   //   defaultValue: '### no data',
   // });
 
-  tt = effect(() => {
-    console.log('');
-    console.log('--- new state');
-    console.log('vault path', this.configurationStore.vaultRootPath());
-    console.log('vault path driveId', this.configurationStore.vaultRootPathDriveId());
-    console.log('vault configuration name', this.configurationStore.vaultConfigurationName());
-    console.log(
-      'vault configuration name driveId',
-      this.configurationStore.vaultConfigurationDriveId(),
-    );
-    console.log('path', this.configurationStore.path());
-    console.log('vault index', this.vaultIndexStore.articles());
-    console.log('exercise configuration startDate', this.exerciseStore.startDate());
-    console.log('reviews', this.statisticsStore.reviews());
-    console.log('article statistics', this.statisticsStore.articles());
-    console.log('exercise statistics', this.statisticsStore.exercises());
-    console.log('days statistics', this.statisticsStore.days());
-  });
-
   loadConfiguration() {
     const rootPath = ['storage', 'it'];
     this.loadConfigurationProcess(rootPath, 'vault.zip');
