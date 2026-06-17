@@ -3,6 +3,7 @@ import { getArticleId } from '../../app/model/article-id';
 import { VaultArticle } from '../../app/model/vault-article';
 import { getDriveId } from '../../app/model/drive-id';
 import { isPath, parsePath, Path } from '../../app/model/path';
+import { parseDate } from '../../model/utils/invalid-date';
 
 @Injectable({
   providedIn: 'root',
@@ -13,11 +14,13 @@ export class ArticleService {
     path,
     name,
     text,
+    pathTopic,
   }: {
     driveId: string;
     path: string | Path;
     name: string;
     text: string;
+    pathTopic: string;
   }): VaultArticle {
     const topicsIndex = text.indexOf('### Links');
     const topicsConent = text.substring(topicsIndex);
@@ -25,6 +28,15 @@ export class ArticleService {
     const cutIndexLinks = text.indexOf('### Links');
     const cutIndex = cutIndexReferences > 0 ? cutIndexReferences : cutIndexLinks;
     const content = cutIndex > 0 ? text.substring(0, cutIndex) : text;
+    const createdIndex = text.indexOf('created::');
+    let created = parseDate(null);
+    if (createdIndex > 0) {
+      let createdText = text.slice(createdIndex + 9).trim();
+      created = parseDate(createdText.slice(0, 16));
+    }
+
+    let topics = this.parseTopics(topicsConent);
+    if (!topics.includes(pathTopic)) topics = [pathTopic, ...topics];
 
     return {
       articleId: getArticleId(path, name),
@@ -32,8 +44,9 @@ export class ArticleService {
       path: isPath(path) ? path : parsePath(path),
       name,
       tags: this.parseTags(content),
-      topics: this.parseTopics(topicsConent),
+      topics,
       indexed: new Date(),
+      created,
       content,
     };
   }

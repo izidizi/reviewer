@@ -85,6 +85,7 @@ export class ResultsService {
     };
     total[result] += 1;
 
+    const score = this.calculateArticleScore(total);
     const lastReviewInterval_days = (Date.now() - lastReview.getTime()) / 1000 / 60 / 60 / 24;
 
     return {
@@ -92,6 +93,7 @@ export class ResultsService {
       lastResult,
       lastReview,
       total,
+      score,
       lastReviewInterval_days,
     };
   }
@@ -147,5 +149,11 @@ export class ResultsService {
         },
       ],
     };
+  }
+
+  calculateArticleScore(total: VaultArticleStatistics['total']) {
+    const knownReviews = total.negative + total.incomplete + total.positive;
+    const score = (total.negative + total.incomplete * 3 + total.positive * 5) / knownReviews;
+    return Math.floor(score * 10) / 10;
   }
 }

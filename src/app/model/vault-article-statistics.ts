@@ -6,6 +6,7 @@ export type VaultArticleStatistics = {
   total: {
     [outcome in ReviewResult]: number;
   };
+  score: number;
   lastReview: Date;
   lastResult: ReviewResult;
   lastReviewInterval_days: number;

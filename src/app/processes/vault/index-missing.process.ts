@@ -125,6 +125,7 @@ export function valutlIndexMissingProcess({
           ...file,
           driveId: file.id,
           text: fileContent,
+          pathTopic: file.path[1],
         });
 
         totalIndexed += 1;

@@ -1,33 +1,41 @@
 import { Component, computed, inject, input } from '@angular/core';
 import { ArticleId } from '../../../model/article-id';
 import { VaultIndexStore } from '../../../store/vault-index/vault-index.store';
-import { AppTagComponent } from '../../../components/tag/tag';
 import { ArticleMoveToComponent } from './move-to';
 import { StatisticsStore } from '../../../store/statistics/statistics.store';
+import { MatCardModule } from '@angular/material/card';
+import { ArticleView } from './article-view';
+import { isValidDate } from '../../../../model/utils/invalid-date';
+import { formatDate } from '../../../helpers';
 
 @Component({
   selector: 'app-index-article-details',
-  imports: [AppTagComponent, ArticleMoveToComponent],
+  imports: [ArticleMoveToComponent, MatCardModule, ArticleView],
   styles: `
     :host {
       min-height: 0;
     }
   `,
-  template: `details for {{ articleId() }}
-    <p>
-      tags:
-      @for (tag of tags(); track $index) {
-        <app-tag [tag]="tag" />
-      }
-    </p>
-    <p>
-      topics:
-      @for (topic of topics(); track $index) {
-        <app-tag [topic]="topic" />
-      }
-    </p>
-    <p>{{ positive() }} / {{ incomplete() }} / {{ negative() }}</p>
-    <app-index-article-move-to [articleId]="articleId()" /> `,
+  template: `
+    <mat-card appearance="outlined">
+      <app-article-view
+        [articleId]="articleId()"
+        [tags]="tags()"
+        [topics]="topics()"
+        [statistics]="statisitcs()"
+        [score]="score()"
+        [created]="created()"
+        [indexed]="indexed()"
+        [lastResult]="lastResult()"
+        [lastReview]="lastReview()"
+        [daysWithoutReview]="daysWithoutReview()"
+      />
+
+      <mat-card-content>
+        <app-index-article-move-to [articleId]="articleId()" />
+      </mat-card-content>
+    </mat-card>
+  `,
 })
 export class ArticleDetailsComponent {
   readonly vaultIndexStore = inject(VaultIndexStore);
@@ -42,17 +50,34 @@ export class ArticleDetailsComponent {
     const article = this.vaultIndexStore.articles()[this.articleId()];
     return article?.topics ?? [];
   });
+  readonly statisitcs = computed(() => {
+    const statistics = this.statisticsStore.articles()[this.articleId()];
+    return statistics?.total ?? { positive: 0, incomplete: 0, negative: 0, unknown: 0 };
+  });
+  readonly created = computed(() => {
+    const article = this.vaultIndexStore.articles()[this.articleId()];
+    return formatDate(article?.created);
+  });
+  readonly indexed = computed(() => {
+    const article = this.vaultIndexStore.articles()[this.articleId()];
+    return formatDate(article?.indexed);
+  });
+  readonly lastReview = computed(() => {
+    const article = this.statisticsStore.articles()[this.articleId()];
+    return formatDate(article?.lastReview);
+  });
+  readonly score = computed(() => {
+    const article = this.statisticsStore.articles()[this.articleId()];
+    return article?.score ?? null;
+  });
+  readonly lastResult = computed(() => {
+    const statistics = this.statisticsStore.articles()[this.articleId()];
+    return statistics?.lastResult ?? null;
+  });
 
-  readonly positive = computed(() => {
+  readonly daysWithoutReview = computed(() => {
     const statistics = this.statisticsStore.articles()[this.articleId()];
-    return statistics?.total.positive ?? 0;
-  });
-  readonly incomplete = computed(() => {
-    const statistics = this.statisticsStore.articles()[this.articleId()];
-    return statistics?.total.incomplete ?? 0;
-  });
-  readonly negative = computed(() => {
-    const statistics = this.statisticsStore.articles()[this.articleId()];
-    return statistics?.total.negative ?? 0;
+    const days = statistics?.lastReviewInterval_days;
+    return days ? Math.ceil(days).toString() : '--';
   });
 }

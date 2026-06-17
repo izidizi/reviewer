@@ -13,7 +13,7 @@ import { isValidDate } from '../../../model/utils/invalid-date';
 import { StatisticsStore } from '../../store/statistics/statistics.store';
 import { VaultArticleStatistics } from '../../model/vault-article-statistics';
 import { ArticleDetailsComponent } from './components/article-details';
-import { getOverallScore } from './bl/get-overall-score';
+import { AppArticleScoreComponent } from '../../components/article-score/article-score';
 
 type IndexRecord = {
   position: number;
@@ -21,8 +21,9 @@ type IndexRecord = {
   articleId: ArticleId;
   indexed: string;
   totalReviewed: number;
-  overallScore: string;
-  overallScoreClass: string;
+  score: number | null;
+  scoreClass: string;
+  daysWithoutReview: string;
 };
 
 @Component({
@@ -36,6 +37,7 @@ type IndexRecord = {
     MatProgressBarModule,
     MatButtonModule,
     ArticleDetailsComponent,
+    AppArticleScoreComponent,
   ],
   templateUrl: 'index.html',
   styleUrl: 'index.scss',
@@ -63,7 +65,15 @@ export class AppIndexComponent implements OnInit {
     this.dataSource.data = Array.from(articlesSet.values()).map((articleId, index) => {
       const article = this.vaultIndexStore.articles()[articleId];
       const statistics = this.statisticsStore.articles()[articleId];
-      const { overallScore, overallScoreClass } = getOverallScore(statistics);
+      const score = statistics?.score ?? null;
+      const daysWithoutReview = statistics?.lastReviewInterval_days;
+      const lastReviewResult = statistics?.lastResult;
+      const scoreClass =
+        lastReviewResult === 'negative'
+          ? 'bad'
+          : lastReviewResult === 'positive'
+            ? 'good'
+            : 'normal';
 
       return {
         position: index + 1,
@@ -77,23 +87,17 @@ export class AppIndexComponent implements OnInit {
             statistics.total.negative +
             statistics.total.unknown
           : 0,
-        overallScore,
-        // overallScore: ['priority_high', 'warning_amber', 'thumb_up'][Math.floor(Math.random() * 3)],
-        overallScoreClass,
+        score,
+        scoreClass,
         tags: article?.tags ?? [],
         topics: article?.topics ?? [],
+        daysWithoutReview:
+          daysWithoutReview != null ? Math.ceil(daysWithoutReview).toString() : '--',
       };
     });
   });
 
-  readonly displayedColumns = [
-    'position',
-    'exists',
-    'articleId',
-    'indexed',
-    'totalReviewed',
-    'overallScore',
-  ];
+  readonly displayedColumns = ['position', 'exists', 'articleId', 'score', 'daysWithoutReview'];
   readonly columnsToDisplayWithExpand = [...this.displayedColumns, 'expand'];
 
   expandedArticle: ArticleId | null = null;

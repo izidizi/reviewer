@@ -12,4 +12,5 @@ export type VaultArticle = {
   topics: string[];
   indexed: Date | InvalidDate;
   content: string | null;
+  created: Date | InvalidDate;
 };

@@ -18,6 +18,7 @@ import { ExerciseStore } from '../store/exercise/exercise.store';
 import { logDebug, logError } from '../../services/debug-logger';
 import { CheckAuthBL } from '../process-bl';
 import { GetDirectoryDriveIdProcess } from './drive';
+import { parseDate } from '../../model/utils/invalid-date';
 
 export class RootPathNotDefined extends ProcessError {
   constructor() {
@@ -160,7 +161,7 @@ function loadConfigurationProcess({
       const vaultIndexStorage = configurationMap['index.json'] as VaultIndexStorage;
       const articles: VaultIndexSlice['articles'] = {};
       vaultIndexStorage.articles.forEach(
-        ({ driveId, path, name, topics: links, tags, indexed }) => {
+        ({ driveId, path, name, topics: links, tags, indexed, created }) => {
           logDebug(`${process} - parsing article`, { entity: `${path}/${name}` });
           const articleId: ArticleId = getArticleId(path, name);
           articles[articleId] = {
@@ -170,7 +171,8 @@ function loadConfigurationProcess({
             name,
             tags,
             topics: links,
-            indexed: new Date(indexed),
+            indexed: parseDate(indexed),
+            created: parseDate(created),
             content: null,
           };
         },

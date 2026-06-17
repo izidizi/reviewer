@@ -109,7 +109,7 @@ export function getArticleContentProcess({
     });
 
     logDebug(`${process} - article parsing`, { entity, payload: { articleId } });
-    const article = articleService.parseArticle({ driveId, path, name, text });
+    const article = articleService.parseArticle({ driveId, path, name, text, pathTopic: path[1] });
 
     logDebug(`${process} - updating store`, { entity, payload: { article } });
     vaultIndexStore.indexArticle(article);

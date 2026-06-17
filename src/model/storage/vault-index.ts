@@ -13,6 +13,7 @@ export type VaultIndexArticleStorage = {
   tags: string[];
   topics: string[];
   indexed: ISO8601String | EmptyISO8601String;
+  created?: ISO8601String | EmptyISO8601String;
 };
 
 export type VaultIndexExerciseConfiguration = {

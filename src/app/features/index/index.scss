@@ -50,9 +50,6 @@ tr.article-row:not(.expanded-article-row):active {
   grid-template-rows: 1fr;
 }
 
-.article-details {
-  min-height: 0;
-}
 
 .toggle-button {
   transition: transform 225ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -61,6 +58,9 @@ tr.article-row:not(.expanded-article-row):active {
 .toggle-button-expanded {
   transform: rotate(180deg);
 }
+
+.article-details {
+  padding: 0 0 0.5rem; }
 
 .awesome {
   color: var(--color-awesome) }
@@ -78,4 +78,4 @@ tr.article-row:not(.expanded-article-row):active {
     display: block;
     position: sticky;
     top: 0;
-    z-index: 10; }
+    z-index: var(--elevation-1-floor); }

@@ -76,6 +76,7 @@ export function vaultIndexAllProcess({
           ...file,
           driveId: file.id,
           text: fileContent,
+          pathTopic: file.path[1],
         });
         articles[article.articleId] = article;
 

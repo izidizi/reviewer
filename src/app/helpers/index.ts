@@ -1,4 +1,5 @@
 export { useBodySize } from './use-body-size';
+export { formatDate } from './fomat-date';
 
 export function isToday(date: Date | undefined | null) {
   const today = new Date();

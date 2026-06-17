@@ -20,20 +20,21 @@
 
 }
 
+.footer-wrapper {
+  position:fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--elevation-1-floor);
+
   .footer {
-    position:fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: var(--footer-height);
-    background-color: var(--mat-sys-surface);
+    margin: 0 auto;
+    width: var(--layout-content-width);
+    overflow-x: auto; }
 
     app-navbar {
-      margin-left: auto;
-      margin-right: auto;
-      width: calc(var(--layout-content-width) - 1rem);
-      overflow-x: auto; }
-  }
+      background-color: var(--mat-sys-surface); }
+}
 
 
 @media (pointer: coarse) {

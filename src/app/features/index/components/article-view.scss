@@ -1,0 +1,29 @@
+.section {
+  padding: 1rem;
+
+  ::ng-deep .section-title {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    padding-bottom: 0.25rem;
+    text-transform: uppercase;
+    font-weight: 500;
+    font-size: 1.1rem;
+
+    mat-icon {
+      color: var(--mat-sys-primary)
+    }
+  }
+}
+
+.tag-and-topic-section {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+
+  .tag-and-topics {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    flex-grow: 1; }
+}

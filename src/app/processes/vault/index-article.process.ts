@@ -83,6 +83,7 @@ export function vaultIndexArticleProcess({
       name,
       driveId: articleDriveId,
       text: fileContent,
+      pathTopic: path[1],
     });
 
     logDebug(`${process} - updating store`, { entity, payload: { article } });

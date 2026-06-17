@@ -1,0 +1,24 @@
+<app-article-view-header [articleId]="articleId()" [isExists]="true" />
+
+<mat-divider></mat-divider>
+
+<mat-card-content class="section tag-and-topic-section">
+  <div class="tag-and-topics">
+    <app-article-view-tags-and-topics display="tag" [items]="tags()" />
+    <app-article-view-tags-and-topics display="topic" [items]="topics()" />
+  </div>
+  <div class="score">
+    <app-article-view-score [score]="score()" />
+    <app-article-view-last-result [lastResult]="lastResult()" />
+  </div>
+</mat-card-content>
+
+<mat-divider></mat-divider>
+
+<mat-card-content class="section statistics-section">
+  <app-article-view-review-statistics [statistics]="statistics()" />
+</mat-card-content>
+
+<mat-card-content class="section info-section">
+  <app-article-view-info [info]="info()" />
+</mat-card-content>

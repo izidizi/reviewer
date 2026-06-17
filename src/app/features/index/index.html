@@ -35,25 +35,23 @@
     <td mat-cell *matCellDef="let record"> {{record.articleId}} </td>
   </ng-container>
 
-  <!-- Indexed Column -->
-  <ng-container matColumnDef="indexed">
-    <th mat-header-cell *matHeaderCellDef> Indexed </th>
-    <td mat-cell *matCellDef="let record"> {{record.indexed}} </td>
-  </ng-container>
-
   <!-- Total Reviewed Column -->
   <ng-container matColumnDef="totalReviewed">
     <th mat-header-cell *matHeaderCellDef> Total </th>
     <td mat-cell *matCellDef="let record"> {{record.totalReviewed}} </td>
   </ng-container>
 
+  <!-- Day without review -->
+  <ng-container matColumnDef="daysWithoutReview">
+    <th mat-header-cell *matHeaderCellDef> Days </th>
+    <td mat-cell *matCellDef="let record"> {{record.daysWithoutReview}} </td>
+  </ng-container>
+
   <!-- Overall Score Column -->
-  <ng-container matColumnDef="overallScore">
+  <ng-container matColumnDef="score">
     <th mat-header-cell *matHeaderCellDef> Score </th>
     <td mat-cell *matCellDef="let record">
-      <mat-icon
-        class="material-icons-outlined" [class]="record.overallScoreClass"
-      >{{record.overallScore}}</mat-icon>
+      <app-article-score [score]="record.score" [class]="record.scoreClass" />
     </td>
   </ng-container>
 
@@ -74,7 +72,12 @@
 
   <!-- Expanded content -->
   <ng-container matColumnDef="expandedDetail">
-    <td mat-cell *matCellDef="let record" [attr.colspan]="columnsToDisplayWithExpand.length">
+    <td
+      mat-cell
+      *matCellDef="let record"
+      [attr.colspan]="columnsToDisplayWithExpand.length"
+      class="article-details"
+    >
       <div class="article-detail-wrapper"
         [class.article-detail-wrapper-expanded]="isExpanded(record.articleId)">
         <app-index-article-details [articleId]="record.articleId" />
