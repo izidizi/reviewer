@@ -4,7 +4,7 @@ import { ConfigurationStore } from '../../store/configuration/configuration.stor
 import { ArticleService } from '../../../services/article/article.service';
 import { VaultIndexStore } from '../../store/vault-index/vault-index.store';
 import { VaultIndexMissingProcess } from '.';
-import { Path } from '../../model/path';
+import { parsePath, Path } from '../../model/path';
 import {
   DriveApiAuthenticationError,
   DriveApiFileNotFoundError,
@@ -125,7 +125,7 @@ export function valutlIndexMissingProcess({
           ...file,
           driveId: file.id,
           text: fileContent,
-          pathTopic: file.path[1],
+          pathTopic: parsePath(file.path)[1],
         });
 
         totalIndexed += 1;
