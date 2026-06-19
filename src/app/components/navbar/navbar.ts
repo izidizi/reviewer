@@ -7,6 +7,7 @@ import { ConfigurationStore } from '../../store/configuration/configuration.stor
 import { ExerciseStore } from '../../store/exercise/exercise.store';
 import { StatisticsStore } from '../../store/statistics/statistics.store';
 import { VaultIndexStore } from '../../store/vault-index/vault-index.store';
+import { GoToProcess } from '../../processes/router';
 
 @Component({
   selector: 'app-navbar',
@@ -24,6 +25,8 @@ export class AppNavbarComponent {
   readonly statisticsStore = inject(StatisticsStore);
   readonly vaultIndexStore = inject(VaultIndexStore);
 
+  readonly gotoProcess = inject(GoToProcess);
+
   readonly hasChanges = computed(() => {
     return this.configurationStore.isUpdated() ||
       this.exerciseStore.isUpdated() ||
@@ -33,8 +36,8 @@ export class AppNavbarComponent {
       : undefined;
   });
 
-  goto(path: string[]) {
-    this.router.navigate(path);
+  goto(route: string[]) {
+    this.gotoProcess(route);
   }
 
   buttonStyleFor(route: string): MatButtonAppearance {

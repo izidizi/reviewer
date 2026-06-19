@@ -1,6 +1,6 @@
 import { GetDirectoryDriveIdProcess, GetFileDriveIdProcess } from '.';
 import { ProcessError } from '../../../model/error/process-error';
-import { DriveApiService } from '../../../services';
+import { DriveApiService } from '../../../services/drive-api';
 import { logDebug, logError } from '../../../services/debug-logger';
 import { getDriveId } from '../../model/drive-id';
 import { createPath, Path } from '../../model/path';

@@ -1,8 +1,8 @@
 import { Routes } from '@angular/router';
+import { vaultRoute } from './features/vault/vault-route';
 import { AppDebugComponent } from './features/debug/debug';
 import { AppTargetLayout } from './layouts/target/target.layout';
 import { AppLoginComponent } from './features/login/login';
-import { AppVaultComponent } from './features/vault/vault';
 import { AppMainLayout } from './layouts/main/main.layout';
 import { AppPlanComponent } from './features/plan/plan';
 import { loginGuard, noAuthGuard, noVaultGuard } from './app-route-guards';
@@ -16,7 +16,7 @@ export const routes: Routes = [
     component: AppTargetLayout,
     children: [
       { path: '', pathMatch: 'full', redirectTo: '/plan' },
-      { path: 'vault', canActivate: [noAuthGuard], component: AppVaultComponent },
+      vaultRoute,
       { path: 'login', canActivate: [loginGuard], component: AppLoginComponent },
     ],
   },

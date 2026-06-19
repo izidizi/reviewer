@@ -15,7 +15,7 @@ import { ConfigurationStore } from '../../store/configuration/configuration.stor
 import { VaultIndexStore } from '../../store/vault-index/vault-index.store';
 import { StatisticsStore } from '../../store/statistics/statistics.store';
 import { ExerciseStore } from '../../store/exercise/exercise.store';
-import { DriveApiService } from '../../../services';
+import { DriveApiService } from '../../../services/drive-api';
 import { ArticleId } from '../../model/article-id';
 import { ReviewResult } from '../../model/review-result';
 import { Router } from '@angular/router';

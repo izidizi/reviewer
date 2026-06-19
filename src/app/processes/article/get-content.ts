@@ -1,7 +1,7 @@
 import { GetArticleContentProcess } from '.';
 import { ProcessError, ProcessUnhandledError } from '../../../model/error/process-error';
 import { isValidDate } from '../../../model/utils/invalid-date';
-import { DriveApiService } from '../../../services';
+import { DriveApiService } from '../../../services/drive-api';
 import { ArticleService } from '../../../services/article/article.service';
 import { logDebug, logError, logInfo } from '../../../services/debug-logger';
 import {

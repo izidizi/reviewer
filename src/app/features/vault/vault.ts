@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatListModule } from '@angular/material/list';
 import { MatButtonModule } from '@angular/material/button';
@@ -8,10 +8,11 @@ import { VaultService } from './vault.service';
 import { LoadConfigurationProcess } from '../../processes/load-configuration.process';
 import { parsePath } from '../../model/path';
 import { NotificationService } from '../../services/notification.service';
-import { Router } from '@angular/router';
 import { logAction, logError } from '../../../services/debug-logger';
 import { DefaultErrorsProcess } from '../../processes/default-errors.process';
 import { ConfigurationService } from '../../../services/configuration.service';
+import { GoToLastUrlProcess, LoadDefaultVaultProcess } from '../../processes/router';
+import { AppRouterStore } from '../../store/app-router/app-router.store';
 
 const place = 'AppVaultComponent';
 @Component({
@@ -21,14 +22,15 @@ const place = 'AppVaultComponent';
   templateUrl: './vault.html',
   styleUrl: './vault.scss',
 })
-export class AppVaultComponent {
-  private router = inject(Router);
+export class AppVaultComponent implements OnInit {
+  readonly appRouterStore = inject(AppRouterStore);
+  readonly loadDefaultVault = inject(LoadDefaultVaultProcess);
   readonly loadConfigurationProcess = inject(LoadConfigurationProcess);
   readonly defaultErrorProcess = inject(DefaultErrorsProcess);
+  readonly goToLastUrl = inject(GoToLastUrlProcess);
 
   readonly vaultService = inject(VaultService);
   readonly isLoading = signal<boolean>(false);
-  readonly vault = signal<string | null>(null);
 
   readonly notificationService = inject(NotificationService);
   readonly configurationService = inject(ConfigurationService);
@@ -46,15 +48,24 @@ export class AppVaultComponent {
     this.vaultService.addVault(vault);
   }
 
+  async ngOnInit() {
+    this.isLoading.set(true);
+
+    await this.loadDefaultVault().catch((error) => {
+      logError(error, `${place}/ngOnInit`);
+    });
+
+    this.isLoading.set(false);
+  }
+
   chooseVault(path: string) {
     logAction('choose vault', place, { entity: path });
 
     this.isLoading.set(true);
-    this.vault.set(path);
-
     this.loadConfigurationProcess(parsePath(path), 'vault.zip')
       .then(() => {
-        this.router.navigate(['plan']);
+        this.appRouterStore.patchVault(path);
+        this.goToLastUrl();
       })
       .catch(async (error) => {
         logError(error, `${place}/choose vault`);

@@ -4,7 +4,7 @@ import { VaultIndexStore } from '../../store/vault-index/vault-index.store';
 import { ExerciseStore } from '../../store/exercise/exercise.store';
 import { moveArticleProcess } from './move.process';
 import { ArticleId } from '../../model/article-id';
-import { DriveApiService } from '../../../services';
+import { DriveApiService } from '../../../services/drive-api';
 import { ArticleService } from '../../../services/article/article.service';
 import { getArticleContentProcess } from './get-content';
 import { CheckAuthBL, ParseArticleIdBL } from '../../process-bl';

@@ -145,9 +145,9 @@ export function logToConsole(
 
       if (mode === 'brief') {
         const briefAddtionalInfo = record.message
-          ? `(M>${record.message})`
+          ? `(Msg> ${record.message})`
           : record.entity
-            ? `(E>${record.entity})`
+            ? `(Ent> ${record.entity})`
             : '';
         console.log(
           `%c${dTSFormatted}| %c[#${recordIndex.toString().padStart(3, '0')}] %c${record.place} %c${briefAddtionalInfo}`,
