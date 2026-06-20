@@ -10,6 +10,7 @@ import { ArticleId, toArticleId } from '../../../model/article-id';
 import { VaultIndexStore } from '../../../store/vault-index/vault-index.store';
 import { MoveArticleProcess } from '../../../processes/article';
 import { NotificationService } from '../../../services/notification.service';
+import { CreateArticleIdBL } from '../../../process-bl';
 
 @Component({
   selector: 'app-index-article-move-to',
@@ -47,7 +48,7 @@ import { NotificationService } from '../../../services/notification.service';
           (input)="filter()"
           (focus)="filter()"
         />
-        <mat-autocomplete requireSelection #auto="matAutocomplete">
+        <mat-autocomplete #auto="matAutocomplete">
           @for (option of articles(); track option) {
             <mat-option [value]="option">{{ option }}</mat-option>
           }
@@ -60,6 +61,7 @@ import { NotificationService } from '../../../services/notification.service';
   `,
 })
 export class ArticleMoveToComponent {
+  readonly createArticleId = inject(CreateArticleIdBL);
   readonly moveArticleProcess = inject(MoveArticleProcess);
   readonly notificationService = inject(NotificationService);
 
@@ -84,11 +86,28 @@ export class ArticleMoveToComponent {
 
   move(): void {
     const to = this.input.nativeElement.value;
-    if (to && to.length > 0) {
-      this.moveArticleProcess(this.articleId(), toArticleId(to));
+
+    const { result: toArticleId, error } = this.inputValidation(to, this.articleId());
+    if (error || !toArticleId) {
+      this.notificationService.showError(error ?? 'unknown error');
+      return;
+    }
+
+    try {
+      this.moveArticleProcess(this.articleId(), toArticleId);
       this.inputControl.setValue('');
-    } else {
-      this.notificationService.showError(`can't move, select destination`);
+    } catch (error) {
+      this.notificationService.showError(error);
+    }
+  }
+
+  inputValidation(value: string, articleId: ArticleId): { result?: ArticleId; error?: string } {
+    try {
+      const result = this.createArticleId(value);
+      if (result === articleId) return { error: `can't move to the same destination` };
+      return { result };
+    } catch (error) {
+      return { error: error instanceof Error ? error.message : String(error) };
     }
   }
 }

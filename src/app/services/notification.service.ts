@@ -26,6 +26,8 @@ export class NotificationService {
 
     if (error instanceof ProcessError) {
       message += error.message;
+    } else if (typeof error === 'string') {
+      message += error;
     } else {
       message += 'unknown error';
     }

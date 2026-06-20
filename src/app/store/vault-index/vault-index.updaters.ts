@@ -25,6 +25,18 @@ export const indexArticle: (article: VaultArticle) => PartialStateUpdater<VaultI
   });
 };
 
+export const deleteArticle: (articleId: ArticleId) => PartialStateUpdater<VaultIndexSlice> = (
+  articleId,
+) => {
+  return ({ articles }) => ({
+    isUpdated: true,
+    articles: {
+      ...articles,
+      [articleId]: undefined,
+    },
+  });
+};
+
 export const resetIsUpdated: () => PartialStateUpdater<VaultIndexSlice> = () => {
   return () => ({
     isUpdated: false,

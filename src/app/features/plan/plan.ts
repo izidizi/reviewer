@@ -7,7 +7,6 @@ import { StatisticsStore } from '../../store/statistics/statistics.store';
 import { ExerciseStore } from '../../store/exercise/exercise.store';
 import { VaultIndexStore } from '../../store/vault-index/vault-index.store';
 import { CreateTodaysPlan } from '../../processes/create-todays-plan';
-import { MatAnchor } from '@angular/material/button';
 import { AppTagComponent } from '../../components/tag/tag';
 import { isToday } from '../../helpers';
 import { ReviewResult, ReviewResultUnknown } from '../../model/review-result';
@@ -15,21 +14,27 @@ import { VaultIndexSlice } from '../../store/vault-index/vault-index.slice';
 import { StatisticsSlice } from '../../store/statistics/statistics.slice';
 import { DefaultErrorsProcess } from '../../processes/default-errors.process';
 import { NotificationService } from '../../services/notification.service';
-import { logAction, logInfo } from '../../../services/debug-logger';
+import { logAction } from '../../../services/debug-logger';
+import { AppArticleScoreComponent } from '../../components/article-score/article-score';
+import { FeaturePlanStore } from './plan.store';
+import { ViewportScroller } from '@angular/common';
 
 const place = 'AppPlanComponent';
 @Component({
   selector: 'app-plan',
-  imports: [MatIconModule, MatListModule, MatAnchor, AppTagComponent],
+  imports: [MatIconModule, MatListModule, AppTagComponent, AppArticleScoreComponent],
   templateUrl: './plan.html',
   styleUrl: './plan.scss',
 })
 export class AppPlanComponent implements OnInit {
   readonly router = inject(Router);
+  readonly scroller = inject(ViewportScroller);
 
   readonly vaultIndexStore = inject(VaultIndexStore);
   readonly exerciseStore = inject(ExerciseStore);
   readonly statisticsStore = inject(StatisticsStore);
+  readonly store = inject(FeaturePlanStore);
+
   readonly createTodaysPlan = inject(CreateTodaysPlan);
   readonly defaultErrorsProcess = inject(DefaultErrorsProcess);
   readonly notificationService = inject(NotificationService);
@@ -79,6 +84,7 @@ export class AppPlanComponent implements OnInit {
   open(articleId: ArticleId) {
     logAction(`open article`, place, { entity: articleId });
     const { path, name } = parseArticleId(articleId);
+    this.store.patchScroll(this.scroller.getScrollPosition());
     this.router.navigate([...path, name]);
   }
 
@@ -93,6 +99,10 @@ export class AppPlanComponent implements OnInit {
       // default error behavior
       this.notificationService.showError(error);
     }
+
+    setTimeout(() => {
+      this.scroller.scrollToPosition(this.store.scroll());
+    }, 100);
   }
 
   getArticleView(
@@ -105,6 +115,7 @@ export class AppPlanComponent implements OnInit {
     tags: string[];
     reviewed: boolean;
     result: ReviewResult;
+    score: number | null;
   }> {
     return Array.from(new Set([...planned, ...reviewed]).values())
       .sort((a, b) => (a < b ? -1 : 1))
@@ -115,6 +126,7 @@ export class AppPlanComponent implements OnInit {
         result: isToday(statistics[articleId]?.lastReview)
           ? (statistics[articleId]?.lastResult ?? ReviewResultUnknown)
           : ReviewResultUnknown,
+        score: statistics[articleId]?.score ?? null,
       }));
   }
 }

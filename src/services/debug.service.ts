@@ -6,6 +6,7 @@ import { ExerciseStore } from '../app/store/exercise/exercise.store';
 import { StatisticsStore } from '../app/store/statistics/statistics.store';
 import { VaultIndexStore } from '../app/store/vault-index/vault-index.store';
 import { AppRouterStore } from '../app/store/app-router/app-router.store';
+import { FeatureIndexStore } from '../app/features/index/index.store';
 
 @Injectable({
   providedIn: 'root',
@@ -18,6 +19,8 @@ export class DebugService {
   readonly statistics = inject(StatisticsStore);
   readonly vaultIndex = inject(VaultIndexStore);
 
+  readonly featureIndex = inject(FeatureIndexStore);
+
   constructor() {
     registerStore('appRouter', this.appRouter);
     registerStore('auth', this.authStore);
@@ -25,5 +28,7 @@ export class DebugService {
     registerStore('exercise', this.exercise);
     registerStore('statistics', this.statistics);
     registerStore('vaultIndex', this.vaultIndex);
+
+    registerStore('featureIndex', this.featureIndex);
   }
 }

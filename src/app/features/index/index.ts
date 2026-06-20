@@ -14,6 +14,8 @@ import { StatisticsStore } from '../../store/statistics/statistics.store';
 import { VaultArticleStatistics } from '../../model/vault-article-statistics';
 import { ArticleDetailsComponent } from './components/article-details';
 import { AppArticleScoreComponent } from '../../components/article-score/article-score';
+import { FeatureIndexStore } from './index.store';
+import { ViewportScroller } from '@angular/common';
 
 type IndexRecord = {
   position: number;
@@ -43,10 +45,13 @@ type IndexRecord = {
   styleUrl: 'index.scss',
 })
 export class AppIndexComponent implements OnInit {
+  readonly scroller = inject(ViewportScroller);
+
   readonly vaultIndexStore = inject(VaultIndexStore);
   readonly statisticsStore = inject(StatisticsStore);
+  readonly featureIndexStore = inject(FeatureIndexStore);
 
-  readonly filter = signal<string | null>(null);
+  readonly filter = signal<string | null>(this.featureIndexStore.filter());
 
   readonly isIndexProcessActive = this.vaultIndexStore.isIndexProcessActive;
   readonly dataSource = new MatTableDataSource<IndexRecord>();
@@ -107,12 +112,22 @@ export class AppIndexComponent implements OnInit {
 
   toggle(articleId: ArticleId) {
     this.expandedArticle = this.isExpanded(articleId) ? null : articleId;
+    this.featureIndexStore.setExpanded(this.expandedArticle);
   }
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.dataSource.filter = this.featureIndexStore.filter();
+    setTimeout(() => {
+      this.scroller.scrollToPosition(this.featureIndexStore.scroll());
+    }, 100);
+
+    const expandedArticleId = this.featureIndexStore.expandedArticleId();
+    if (expandedArticleId) this.toggle(expandedArticleId);
+  }
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
+    this.featureIndexStore.setFilter(filterValue);
     this.dataSource.filter = filterValue.trim().toLowerCase();
   }
 }

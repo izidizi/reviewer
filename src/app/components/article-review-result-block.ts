@@ -1,20 +1,13 @@
 import { Component, computed, input } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { ReviewResult } from '../../../model/review-result';
-import { AppArticleReviewResultComponent } from '../../../components/article-review-result/article-review-result';
+import { AppArticleReviewResultComponent } from './article-review-result/article-review-result';
+import { ReviewResult } from '../model/review-result';
 
 @Component({
-  selector: 'app-article-view-last-result',
+  selector: 'app-article-last-result-block',
   imports: [MatIconModule, AppArticleReviewResultComponent],
   styles: `
-    app-article-review-result ::ng-deep mat-icon {
-      position: relative;
-      top: 3px;
-      font-size: 3rem;
-      width: 3rem;
-      height: 3rem;
-    }
-    .score-container {
+    :host {
       display: flex;
       gap: 0.5rem;
       align-items: center;
@@ -22,6 +15,16 @@ import { AppArticleReviewResultComponent } from '../../../components/article-rev
       margin: 1rem;
       border-radius: 8px;
       border: 1px solid var(--mat-sys-outline-variant);
+
+      app-article-review-result {
+        ::ng-deep mat-icon {
+          position: relative;
+          top: 3px;
+          font-size: 3rem;
+          width: 3rem;
+          height: 3rem;
+        }
+      }
 
       .score-content {
         display: flex;
@@ -39,16 +42,14 @@ import { AppArticleReviewResultComponent } from '../../../components/article-rev
     }
   `,
   template: `
-    <div class="score-container">
-      <app-article-review-result [result]="lastResult()" />
-      <div class="score-content">
-        <span class="score-label">Last</span>
-        <span class="score-value">{{ nummericValue() }}</span>
-      </div>
+    <app-article-review-result [result]="lastResult()" />
+    <div class="score-content">
+      <span class="score-label">Last</span>
+      <span class="score-value">{{ nummericValue() }}</span>
     </div>
   `,
 })
-export class ArticleViewLastResult {
+export class AppArticleLastResultBlockComponent {
   readonly lastResult = input.required<ReviewResult | null>();
   readonly nummericValue = computed(() => {
     const result = this.lastResult();

@@ -3,6 +3,7 @@ import { initialVaultIndexSlice, VaultIndexSlice } from './vault-index.slice';
 import * as updaters from './vault-index.updaters';
 import { VaultArticle } from '../../model/vault-article';
 import { vaultIndexDerived } from './vault-index.derived';
+import { ArticleId } from '../../model/article-id';
 
 export type VaultIndexStore = InstanceType<typeof VaultIndexStore>;
 
@@ -15,6 +16,7 @@ export const VaultIndexStore = signalStore(
       setArticles: (articles: VaultIndexSlice['articles']) =>
         patchState(store, updaters.setArticles(articles)),
       indexArticle: (article: VaultArticle) => patchState(store, updaters.indexArticle(article)),
+      deleteArticle: (articleId: ArticleId) => patchState(store, updaters.deleteArticle(articleId)),
       resetIsUpdated: () => patchState(store, updaters.resetIsUpdated()),
 
       startVaultIndex: (data: updaters.StartVaultIndexData) =>

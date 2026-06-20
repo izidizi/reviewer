@@ -19,7 +19,7 @@ export const noAuthGuard: CanActivateFn = (route, state) => {
   const authStore = inject(AuthStore);
   const router = inject(Router);
 
-  logDebug('auth check', {
+  logDebug('auth check guard', {
     includeStack: true,
     entity: `url: ${route.url.map(({ path }) => path).join('/')}`,
     payload: {

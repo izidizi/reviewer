@@ -1,8 +1,11 @@
-.spacer {
-  flex: 1 1 auto; }
+.topics {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem 0; }
 
 .actions {
-  justify-content: center;
+  display: flex;
+  justify-content: space-between;
   align-items: center; }
 
 .markdown-body {

@@ -1,10 +1,12 @@
 import { Component, inject, input } from '@angular/core';
+import { ViewportScroller } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
 import { logAction } from '../../../../services/debug-logger';
 import { ParseArticleIdBL } from '../../../process-bl';
 import { ArticleId } from '../../../model/article-id';
 import { Router } from '@angular/router';
+import { FeatureIndexStore } from '../index.store';
 
 @Component({
   selector: 'app-article-view-header',
@@ -57,9 +59,13 @@ export class ArticleViewHeader {
   readonly isExists = input.required<boolean>();
 
   readonly router = inject(Router);
+  readonly scroller = inject(ViewportScroller);
+  readonly featureIndexStore = inject(FeatureIndexStore);
+
   readonly parseArticleId = inject(ParseArticleIdBL);
 
   open() {
+    this.featureIndexStore.setScroll(this.scroller.getScrollPosition());
     const articleId = this.articleId();
     logAction(`open article`, 'ArticleViewHeader', { entity: articleId });
     const { path, name } = this.parseArticleId(articleId);

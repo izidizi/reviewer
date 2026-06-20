@@ -10,10 +10,10 @@ import { ReviewResult } from '../../../model/review-result';
 import { ArticleViewTagsAndTopics } from './article-view-tags-and-topics';
 import { ArticleViewReviewStatistics } from './article-view-review-statistics';
 import { VaultArticleStatistics } from '../../../model/vault-article-statistics';
-import { ArticleViewScore } from './article-view-score';
-import { ArticleViewLastResult } from './article-view-last-result';
 import { ArticleViewInfo } from './article-view-info';
 import { ArticleViewHeader } from './article-view-header';
+import { AppArticleScoreBlockComponent } from '../../../components/article-score-block';
+import { AppArticleLastResultBlockComponent } from '../../../components/article-review-result-block';
 
 @Component({
   selector: 'app-article-view',
@@ -28,8 +28,8 @@ import { ArticleViewHeader } from './article-view-header';
     MatTooltipModule,
     ArticleViewTagsAndTopics,
     ArticleViewReviewStatistics,
-    ArticleViewScore,
-    ArticleViewLastResult,
+    AppArticleScoreBlockComponent,
+    AppArticleLastResultBlockComponent,
     ArticleViewInfo,
     ArticleViewHeader,
   ],

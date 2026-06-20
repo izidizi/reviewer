@@ -16,8 +16,9 @@ export const MoveArticleProcess = new InjectionToken<MoveArticleProcess>('MoveAr
     const vaultIndexStore = inject(VaultIndexStore);
     const statisticsStore = inject(StatisticsStore);
     const exerciseStore = inject(ExerciseStore);
+    const parseArticleId = inject(ParseArticleIdBL);
 
-    return moveArticleProcess({ vaultIndexStore, statisticsStore, exerciseStore });
+    return moveArticleProcess({ vaultIndexStore, statisticsStore, exerciseStore, parseArticleId });
   },
 });
 

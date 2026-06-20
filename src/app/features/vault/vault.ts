@@ -11,7 +11,7 @@ import { NotificationService } from '../../services/notification.service';
 import { logAction, logError } from '../../../services/debug-logger';
 import { DefaultErrorsProcess } from '../../processes/default-errors.process';
 import { ConfigurationService } from '../../../services/configuration.service';
-import { GoToLastUrlProcess, LoadDefaultVaultProcess } from '../../processes/router';
+import { GoToLastUrlProcess, GoToProcess, LoadDefaultVaultProcess } from '../../processes/router';
 import { AppRouterStore } from '../../store/app-router/app-router.store';
 
 const place = 'AppVaultComponent';
@@ -28,6 +28,7 @@ export class AppVaultComponent implements OnInit {
   readonly loadConfigurationProcess = inject(LoadConfigurationProcess);
   readonly defaultErrorProcess = inject(DefaultErrorsProcess);
   readonly goToLastUrl = inject(GoToLastUrlProcess);
+  readonly goto = inject(GoToProcess);
 
   readonly vaultService = inject(VaultService);
   readonly isLoading = signal<boolean>(false);
@@ -63,9 +64,9 @@ export class AppVaultComponent implements OnInit {
 
     this.isLoading.set(true);
     this.loadConfigurationProcess(parsePath(path), 'vault.zip')
-      .then(() => {
+      .then(async () => {
         this.appRouterStore.patchVault(path);
-        this.goToLastUrl();
+        if ((await this.goToLastUrl()) === false) this.goto(['plan']);
       })
       .catch(async (error) => {
         logError(error, `${place}/choose vault`);

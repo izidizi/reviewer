@@ -17,7 +17,7 @@ export const GoToProcess = new InjectionToken<GoToProcess>('GoToProcess', {
   },
 });
 
-export type GoToLastUrlProcess = () => Promise<void>;
+export type GoToLastUrlProcess = () => Promise<boolean>;
 export const GoToLastUrlProcess = new InjectionToken<GoToLastUrlProcess>('GoToLastUrlProcess', {
   providedIn: 'root',
   factory: () => {

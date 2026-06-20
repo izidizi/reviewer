@@ -22,6 +22,11 @@ import { ParseArticleIdBL } from '../../process-bl';
 import { NotificationService } from '../../services/notification.service';
 import { LoadArticleContentLogic } from './logics/get-article-content';
 import { ThemeService } from '../../../services/theme/theme.service';
+import { GoToLastUrlProcess } from '../../processes/router';
+import { AppTagComponent } from '../../components/tag/tag';
+import { AppArticleScoreBlockComponent } from '../../components/article-score-block';
+import { AppArticleLastResultBlockComponent } from '../../components/article-review-result-block';
+import { AppReviewHeaderComponent } from './components/review-header';
 
 @Component({
   selector: 'app-review',
@@ -31,6 +36,10 @@ import { ThemeService } from '../../../services/theme/theme.service';
     MatToolbarModule,
     MarkdownComponent,
     AppReviewButtonsComponent,
+    AppTagComponent,
+    AppReviewHeaderComponent,
+    AppArticleScoreBlockComponent,
+    AppArticleLastResultBlockComponent,
   ],
   templateUrl: './review.html',
   styleUrl: './review.scss',
@@ -46,6 +55,7 @@ export class AppReviewComponent implements OnInit {
   readonly parseArticleId = inject(ParseArticleIdBL);
   readonly reviewProcess = inject(ReviewProcess);
   readonly loadArticleContentLogic = inject(LoadArticleContentLogic);
+  readonly gotoLastUrl = inject(GoToLastUrlProcess);
 
   readonly urlTree = this.router.parseUrl(this.router.url);
 
@@ -120,8 +130,26 @@ export class AppReviewComponent implements OnInit {
     return reviewResult !== null && reviewResult !== ReviewResultUnknown;
   });
 
+  readonly score = computed(() => {
+    const statistics = this.articleStatists();
+    return statistics?.score ?? null;
+  });
+
+  readonly articleStatists = computed(() => {
+    const articleId = this.articleId();
+    if (articleId === null) return null;
+
+    const articlesIndex = this.statisticsStore.articles();
+    return articlesIndex[articleId] ?? null;
+  });
+
+  readonly lastReviewResult = computed(() => {
+    const statistics = this.articleStatists();
+    return statistics?.lastResult ?? 'unknown';
+  });
+
   onClose() {
-    this.router.navigate(['plan']);
+    this.gotoLastUrl();
   }
 
   selectResult(result: ReviewResult) {
@@ -130,7 +158,7 @@ export class AppReviewComponent implements OnInit {
       this.reviewProcess(articleId, result);
     }
 
-    this.router.navigate(['plan']);
+    this.gotoLastUrl();
   }
 
   readonly isLoading = signal<boolean>(false);

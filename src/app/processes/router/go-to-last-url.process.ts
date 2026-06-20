@@ -17,11 +17,12 @@ export function goToLastUrlProcess({
     const path = parsePath(appRouterStore.lastUrl() ?? '');
     if (path.length === 0) {
       logDebug(`${process} - early exit, not last url`);
-      return;
+      return false;
     }
     logDebug(`${process} - navigating`, { entity: createPath(path) });
     await goToProcess(path);
 
     logDebug(`${process} - finish`);
+    return true;
   };
 }
