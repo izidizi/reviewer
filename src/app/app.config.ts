@@ -11,6 +11,7 @@ import { provideMarkdown } from 'ngx-markdown';
 import { routes } from './app-routes';
 import { ConfigurationService } from '../services/configuration.service';
 import { DebugService } from '../services/debug.service';
+import { VaultStateEffects } from './store/vault-state/vault-state.effects';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -21,6 +22,10 @@ export const appConfig: ApplicationConfig = {
 
     provideAppInitializer(() => {
       const debugService = inject(DebugService);
+
+      // effects
+      const vaultState = inject(VaultStateEffects);
+
       const configurationService = inject(ConfigurationService);
       return configurationService.init();
     }),

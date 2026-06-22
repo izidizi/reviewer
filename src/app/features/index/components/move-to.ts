@@ -6,11 +6,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 
-import { ArticleId, toArticleId } from '../../../model/article-id';
-import { VaultIndexStore } from '../../../store/vault-index/vault-index.store';
+import { ArticleId } from '../../../model/article-id';
 import { MoveArticleProcess } from '../../../processes/article';
 import { NotificationService } from '../../../services/notification.service';
 import { CreateArticleIdBL } from '../../../process-bl';
+import { VaultStore } from '../../../store/vault/vault.store';
 
 @Component({
   selector: 'app-index-article-move-to',
@@ -65,14 +65,14 @@ export class ArticleMoveToComponent {
   readonly moveArticleProcess = inject(MoveArticleProcess);
   readonly notificationService = inject(NotificationService);
 
-  readonly vaultIndexStore = inject(VaultIndexStore);
+  readonly vault = inject(VaultStore);
 
   readonly articleId = input.required<ArticleId>();
 
   readonly filterValue = signal<string>('');
   readonly articles = computed(() => {
     const filterValue = this.filterValue();
-    const articles = Object.keys(this.vaultIndexStore.articles());
+    const articles = Object.keys(this.vault.articlesIndex());
 
     return articles.filter((articleId) => articleId.includes(filterValue));
   });

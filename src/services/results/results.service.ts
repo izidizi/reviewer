@@ -9,10 +9,16 @@ import { ExerciseSlice } from '../../app/store/exercise/exercise.slice';
 import { ISO8601DateString, toISO6801DateString } from '../../model/utils/iso8601-string';
 import { VaultDayStatistics } from '../../app/model/vault-day-statistics';
 
+/**
+ * @deprecated use corresponding logics
+ */
 @Injectable({
   providedIn: 'root',
 })
 export class ResultsService {
+  /**
+   * @deprecated
+   */
   processResults(
     reviews: readonly ReviewStorage[],
     excerciseConfiguration: Pick<ExerciseSlice, 'startDate' | 'repeatTimes'>,
@@ -65,6 +71,9 @@ export class ResultsService {
     };
   }
 
+  /**
+   * @deprecated use UpdateArticleStatisticsLogic
+   */
   updateArticleStatistics(
     review: ReviewStorage,
     articleStatistics?: VaultArticleStatistics,
@@ -98,6 +107,9 @@ export class ResultsService {
     };
   }
 
+  /**
+   * @deprecated use UpdateArticleStatisticsLogic
+   */
   updateArticleExerciseStat(
     review: ReviewStorage,
     { startDate, repeatTimes }: Pick<ExerciseSlice, 'startDate' | 'repeatTimes'>,
@@ -132,6 +144,9 @@ export class ResultsService {
     };
   }
 
+  /**
+   * @deprecated use UpdateArticleStatisticsLogic
+   */
   updateDayStatistics(
     { path, name, reviewed, result }: ReviewStorage,
     dayStatistics?: VaultDayStatistics,
@@ -151,6 +166,9 @@ export class ResultsService {
     };
   }
 
+  /**
+   * @deprecated
+   */
   calculateArticleScore(total: VaultArticleStatistics['total']) {
     const knownReviews = total.negative + total.incomplete + total.positive;
     const score = (total.negative + total.incomplete * 3 + total.positive * 5) / knownReviews;

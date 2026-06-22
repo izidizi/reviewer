@@ -1,18 +1,15 @@
 import { Component, computed, effect, inject, OnInit, signal } from '@angular/core';
 import { MarkdownComponent } from 'ngx-markdown';
 import { AppLoginComponent } from '../login/login';
-import { AppTodayStatisticsComponent } from '../today-statistics/today-statistics';
-import { AppArticlesIndexComponent } from '../articles-index/articles-index';
 import { LoadConfigurationProcess } from '../../processes/load-configuration.process';
 import { SaveConfigufationProcess } from '../../processes/save-configuration.process';
 import { GetFileCapabilitiesProcess } from '../../processes/get-file-capabilities';
-import { CreateTodaysPlan } from '../../processes/create-todays-plan';
+import { CreateTodaysPlanProcess } from '../../processes/create-todays-plan';
 import { GetArticleContentProcess, MoveArticleProcess } from '../../processes/article';
 import { ReviewProcess } from '../../processes/review';
 import { ReviewGetNextArticleProcess } from '../../processes/review-get-next-article';
 import { AuthStore } from '../../store/auth/auth.store';
 import { ConfigurationStore } from '../../store/configuration/configuration.store';
-import { VaultIndexStore } from '../../store/vault-index/vault-index.store';
 import { StatisticsStore } from '../../store/statistics/statistics.store';
 import { ExerciseStore } from '../../store/exercise/exercise.store';
 import { DriveApiService } from '../../../services/drive-api';
@@ -20,13 +17,12 @@ import { ArticleId } from '../../model/article-id';
 import { ReviewResult } from '../../model/review-result';
 import { Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
-import { VaultIndexAllProcess } from '../../processes/vault';
 import { logDebug } from '../../../services/debug-logger';
 import { useBodySize } from '../../helpers';
 
 @Component({
   selector: 'app-debug',
-  imports: [MatButtonModule, MarkdownComponent, AppLoginComponent, AppArticlesIndexComponent],
+  imports: [MatButtonModule, MarkdownComponent, AppLoginComponent],
   templateUrl: './debug.html',
   styleUrl: './debug.scss',
 })
@@ -34,10 +30,9 @@ export class AppDebugComponent implements OnInit {
   private router = inject(Router);
 
   readonly loadConfigurationProcess = inject(LoadConfigurationProcess);
-  readonly indexVaultProcess = inject(VaultIndexAllProcess);
   readonly saveConfigurationProcess = inject(SaveConfigufationProcess);
   readonly getFileCapabilities = inject(GetFileCapabilitiesProcess);
-  readonly createTodaysPlan = inject(CreateTodaysPlan);
+  readonly createTodaysPlan = inject(CreateTodaysPlanProcess);
   readonly getArticleContentProcess = inject(GetArticleContentProcess);
   readonly reviewProcess = inject(ReviewProcess);
   readonly reviewGetNextArticleProcess = inject(ReviewGetNextArticleProcess);
@@ -45,7 +40,6 @@ export class AppDebugComponent implements OnInit {
 
   readonly state = inject(AuthStore);
   readonly configurationStore = inject(ConfigurationStore);
-  readonly vaultIndexStore = inject(VaultIndexStore);
   readonly statisticsStore = inject(StatisticsStore);
   readonly exerciseStore = inject(ExerciseStore);
 
@@ -79,7 +73,7 @@ export class AppDebugComponent implements OnInit {
   }
 
   indexVault() {
-    this.indexVaultProcess();
+    throw Error('no process');
   }
 
   save() {

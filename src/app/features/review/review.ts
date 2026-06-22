@@ -9,7 +9,6 @@ import {
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { VaultIndexStore } from '../../store/vault-index/vault-index.store';
 import { Router } from '@angular/router';
 import { parserArticleIdFromURL } from '../../model/article-id';
 import { MarkdownComponent } from 'ngx-markdown';
@@ -20,13 +19,15 @@ import { isToday } from '../../helpers';
 import { ReviewProcess } from '../../processes/review';
 import { ParseArticleIdBL } from '../../process-bl';
 import { NotificationService } from '../../services/notification.service';
-import { LoadArticleContentLogic } from './logics/get-article-content';
+import { LoadArticleContentScenario } from './scenarios/get-article-content';
 import { ThemeService } from '../../../services/theme/theme.service';
 import { GoToLastUrlProcess } from '../../processes/router';
 import { AppTagComponent } from '../../components/tag/tag';
 import { AppArticleScoreBlockComponent } from '../../components/article-score-block';
 import { AppArticleLastResultBlockComponent } from '../../components/article-review-result-block';
 import { AppReviewHeaderComponent } from './components/review-header';
+import { CacheStore } from '../../store/cache/cache.store';
+import { VaultStore } from '../../store/vault/vault.store';
 
 @Component({
   selector: 'app-review',
@@ -49,12 +50,13 @@ export class AppReviewComponent implements OnInit {
   readonly router = inject(Router);
 
   readonly themeService = inject(ThemeService);
-  readonly vaultIndexStore = inject(VaultIndexStore);
+  readonly vault = inject(VaultStore);
+  readonly cache = inject(CacheStore);
   readonly statisticsStore = inject(StatisticsStore);
   readonly notificationService = inject(NotificationService);
   readonly parseArticleId = inject(ParseArticleIdBL);
   readonly reviewProcess = inject(ReviewProcess);
-  readonly loadArticleContentLogic = inject(LoadArticleContentLogic);
+  readonly loadArticleContentLogic = inject(LoadArticleContentScenario);
   readonly gotoLastUrl = inject(GoToLastUrlProcess);
 
   readonly urlTree = this.router.parseUrl(this.router.url);
@@ -68,14 +70,15 @@ export class AppReviewComponent implements OnInit {
    * articleId
    */
   readonly articleId = signal(parserArticleIdFromURL(this.urlTree.toString()));
-  readonly isValidArticleId = computed(() => {
+  readonly article = computed(() => {
     const articleId = this.articleId();
-    if (!articleId) return false;
+    if (!articleId) return null;
+
     try {
       this.parseArticleId(articleId);
-      return true;
+      return this.vault.article(articleId)();
     } catch {
-      return false;
+      return null;
     }
   });
 
@@ -83,8 +86,8 @@ export class AppReviewComponent implements OnInit {
    * title
    */
   readonly title = computed(() => {
-    const isValidArticleId = this.isValidArticleId();
-    if (!isValidArticleId) return '';
+    const article = this.article();
+    if (!article) return '';
 
     const articleId = this.articleId();
     if (!articleId) return '';
@@ -100,16 +103,16 @@ export class AppReviewComponent implements OnInit {
     const isLoading = this.isLoading();
     if (isLoading) return '### loading...';
 
-    const articlesIndex = this.vaultIndexStore.articles();
-    return articlesIndex[articleId]?.content ?? '### article not longer available';
+    const articlesIndex = this.cache.articlesContent();
+    return articlesIndex[articleId]?.content ?? '### article no longer available';
   });
 
   readonly articleTopics = computed(() => {
     const articleId = this.articleId();
     if (articleId === null) return [];
 
-    const articlesIndex = this.vaultIndexStore.articles();
-    if (!articlesIndex[articleId]?.content) return [];
+    const articlesIndex = this.vault.articlesIndex();
+    if (!articlesIndex[articleId]?.topics) return [];
 
     return articlesIndex[articleId].topics;
   });

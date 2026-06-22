@@ -1,19 +1,17 @@
 import { inject, InjectionToken } from '@angular/core';
 import { GetArticleContentProcess } from '../../../processes/article';
-import { VaultIndexArticleProcess } from '../../../processes/vault';
 import { ArticleId } from '../../../model/article-id';
 import { ArticleByDriveIdNotFoundError } from '../../../processes/article/get-content';
 import { logDebug, logError } from '../../../../services/debug-logger';
 import { DefaultErrorsProcess } from '../../../processes/default-errors.process';
 import { NotificationService } from '../../../services/notification.service';
 
-const place = 'LoadArticleContentLogic';
-export type LoadArticleContentLogic = (articleId: ArticleId) => Promise<void>;
-export const LoadArticleContentLogic = new InjectionToken<LoadArticleContentLogic>(place, {
+const place = 'LoadArticleContentScenario';
+export type LoadArticleContentScenario = (articleId: ArticleId) => Promise<void>;
+export const LoadArticleContentScenario = new InjectionToken<LoadArticleContentScenario>(place, {
   factory: () => {
     const notificationService = inject(NotificationService);
     const getArticleContentProcess = inject(GetArticleContentProcess);
-    const indexArticleProcess = inject(VaultIndexArticleProcess);
     const defaultErrorsProcess = inject(DefaultErrorsProcess);
 
     return async (articleId) => {
@@ -25,7 +23,6 @@ export const LoadArticleContentLogic = new InjectionToken<LoadArticleContentLogi
               entity: `article: [${articleId}]`,
               includeStack: true,
             });
-            await indexArticleProcess(articleId);
           } else {
             throw error;
           }

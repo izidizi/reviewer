@@ -5,12 +5,10 @@ import { ArticleId, parseArticleId } from '../../model/article-id';
 import { Router } from '@angular/router';
 import { StatisticsStore } from '../../store/statistics/statistics.store';
 import { ExerciseStore } from '../../store/exercise/exercise.store';
-import { VaultIndexStore } from '../../store/vault-index/vault-index.store';
-import { CreateTodaysPlan } from '../../processes/create-todays-plan';
+import { CreateTodaysPlanProcess } from '../../processes/create-todays-plan';
 import { AppTagComponent } from '../../components/tag/tag';
 import { isToday } from '../../helpers';
 import { ReviewResult, ReviewResultUnknown } from '../../model/review-result';
-import { VaultIndexSlice } from '../../store/vault-index/vault-index.slice';
 import { StatisticsSlice } from '../../store/statistics/statistics.slice';
 import { DefaultErrorsProcess } from '../../processes/default-errors.process';
 import { NotificationService } from '../../services/notification.service';
@@ -18,6 +16,8 @@ import { logAction } from '../../../services/debug-logger';
 import { AppArticleScoreComponent } from '../../components/article-score/article-score';
 import { FeaturePlanStore } from './plan.store';
 import { ViewportScroller } from '@angular/common';
+import { VaultStore } from '../../store/vault/vault.store';
+import { VaultSlice } from '../../store/vault/vault.slice';
 
 const place = 'AppPlanComponent';
 @Component({
@@ -30,17 +30,17 @@ export class AppPlanComponent implements OnInit {
   readonly router = inject(Router);
   readonly scroller = inject(ViewportScroller);
 
-  readonly vaultIndexStore = inject(VaultIndexStore);
+  readonly vault = inject(VaultStore);
   readonly exerciseStore = inject(ExerciseStore);
   readonly statisticsStore = inject(StatisticsStore);
   readonly store = inject(FeaturePlanStore);
 
-  readonly createTodaysPlan = inject(CreateTodaysPlan);
+  readonly createTodaysPlan = inject(CreateTodaysPlanProcess);
   readonly defaultErrorsProcess = inject(DefaultErrorsProcess);
   readonly notificationService = inject(NotificationService);
 
   readonly new = computed(() => {
-    const articles = this.vaultIndexStore.articles();
+    const articles = this.vault.articlesIndex();
     const plannedNew = this.exerciseStore.todayNew();
     const statistics = this.statisticsStore.articles();
     const excersises = Object.values(this.statisticsStore.exercises());
@@ -54,7 +54,7 @@ export class AppPlanComponent implements OnInit {
   });
 
   readonly repeat = computed(() => {
-    const articles = this.vaultIndexStore.articles();
+    const articles = this.vault.articlesIndex();
     const plannedRepeat = this.exerciseStore.todayRepeat();
     const statistics = this.statisticsStore.articles();
     const excersises = Object.values(this.statisticsStore.exercises());
@@ -68,7 +68,7 @@ export class AppPlanComponent implements OnInit {
   });
 
   readonly consolidate = computed(() => {
-    const articles = this.vaultIndexStore.articles();
+    const articles = this.vault.articlesIndex();
     const plannedConsolidate = this.exerciseStore.todayConsolidate();
     const statistics = this.statisticsStore.articles();
     const excersises = Object.values(this.statisticsStore.exercises());
@@ -108,7 +108,7 @@ export class AppPlanComponent implements OnInit {
   getArticleView(
     planned: ArticleId[],
     reviewed: ArticleId[],
-    articles: VaultIndexSlice['articles'],
+    articles: VaultSlice['articlesIndex'],
     statistics: StatisticsSlice['articles'],
   ): Array<{
     articleId: ArticleId;

@@ -1,10 +1,9 @@
 import { Component, input } from '@angular/core';
-import { AppTagComponent } from '../../../components/tag/tag';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-article-view-info',
-  imports: [MatIconModule, AppTagComponent],
+  imports: [MatIconModule],
   styles: `
     :host {
       display: grid;

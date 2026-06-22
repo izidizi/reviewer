@@ -5,6 +5,10 @@ import { getDriveId } from '../../app/model/drive-id';
 import { isPath, parsePath, Path } from '../../app/model/path';
 import { parseDate } from '../../model/utils/invalid-date';
 
+/**
+ * @deprecated use corresponding logics
+ */
+
 @Injectable({
   providedIn: 'root',
 })

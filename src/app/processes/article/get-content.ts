@@ -1,8 +1,7 @@
 import { GetArticleContentProcess } from '.';
 import { ProcessError, ProcessUnhandledError } from '../../../model/error/process-error';
-import { isValidDate } from '../../../model/utils/invalid-date';
+import { isValidDate, parseDate } from '../../../model/utils/invalid-date';
 import { DriveApiService } from '../../../services/drive-api';
-import { ArticleService } from '../../../services/article/article.service';
 import { logDebug, logError, logInfo } from '../../../services/debug-logger';
 import {
   DriveApiAuthenticationError,
@@ -10,7 +9,31 @@ import {
   DriveApiUnexpectedAnswerError,
 } from '../../../services/drive-api/drive-api-errors';
 import { CheckAuthBL, UserNotAuthorised, ParseArticleIdBL } from '../../process-bl';
-import { VaultIndexStore } from '../../store/vault-index/vault-index.store';
+import { VaultStore } from '../../store/vault/vault.store';
+import { VaultStateStore } from '../../store/vault-state/vault-state.store';
+import { CacheStore } from '../../store/cache/cache.store';
+import { ParseArticleLogic } from '../../process-bl/parse-article';
+import { GetFileDriveIdProcess } from '../drive';
+import { isPath, parsePath } from '../../model/path';
+import { isVaultFile } from '../../model/vault-file';
+
+export class NotImplemetedCaseError extends ProcessError {
+  constructor() {
+    super({
+      process,
+      message: `loading article content withoud driveId is not yet possible`,
+    });
+  }
+}
+
+export class NotValidArticleNameError extends ProcessError {
+  constructor(articleId: string, name: string) {
+    super({
+      process,
+      message: `[${articleId}] couldn't be loaded using, name "${name}" is not valid`,
+    });
+  }
+}
 
 export class ArticleByDriveIdNotFoundError extends ProcessError {
   constructor(entity: string, id: string) {
@@ -27,12 +50,9 @@ export class ArticleByDriveIdLoadError extends ProcessError {
   }
 }
 
-export class EdgeCaseContentLoadingNotImplementedError extends ProcessError {
-  constructor(entity: string) {
-    super({
-      process,
-      message: `${entity} is not in the index, this case is not yet implemented`,
-    });
+export class UnexpectedArticleHasBeenLoadedError extends ProcessError {
+  constructor(articleId: string, loadedArticleId: string) {
+    super({ process, message: `while loading article [${articleId}] got [${loadedArticleId}]` });
   }
 }
 
@@ -41,14 +61,18 @@ export function getArticleContentProcess({
   driveApi,
   parseArticleId,
   checkAuth,
-  vaultIndexStore,
-  articleService,
+  vault,
+  vaultState,
+  cache,
+  parseArticle,
 }: {
   driveApi: DriveApiService;
   parseArticleId: ParseArticleIdBL;
   checkAuth: CheckAuthBL;
-  vaultIndexStore: VaultIndexStore;
-  articleService: ArticleService;
+  vault: VaultStore;
+  vaultState: VaultStateStore;
+  cache: CacheStore;
+  parseArticle: ParseArticleLogic;
 }): GetArticleContentProcess {
   return async (articleId) => {
     const entity = `article [${articleId}]`;
@@ -60,36 +84,39 @@ export function getArticleContentProcess({
         articleId,
       },
     });
-    const indexArticle = vaultIndexStore.articles()[articleId];
+    const indexArticle = vault.articlesIndex()[articleId];
+    const cachedContent = cache.articlesContent()[articleId];
+    const indexed = parseDate(indexArticle?.indexed);
 
     logDebug(`${process} - article index record`, {
       entity,
       payload: {
         articleId,
         exists: !!indexArticle,
-        hasContent: indexArticle?.content != null,
+        hasContent: !!cachedContent,
         indexed: (indexArticle?.indexed ?? '--').toString(),
       },
     });
     if (
       indexArticle &&
-      indexArticle.content !== null &&
-      isValidDate(indexArticle.indexed) /* && indexArticle.indexed > [cache threshold] */
+      cachedContent?.content &&
+      isValidDate(indexed) /* && indexArticle.indexed > [cache threshold] */
     ) {
       logDebug(`${process} - early finish with cached content`, {
-        payload: { article: { ...indexArticle } },
+        payload: { article: { ...cachedContent } },
       });
-      return indexArticle.content;
-    }
-
-    const { path, name } = indexArticle ? indexArticle : parseArticleId(articleId);
-    let driveId = indexArticle?.driveId;
-    if (!driveId) {
-      throw new EdgeCaseContentLoadingNotImplementedError(articleId);
+      return cachedContent.content;
     }
 
     logDebug(`${process} - loading article content`, { entity, payload: { articleId } });
     const accessToken = await checkAuth();
+
+    const { path, name } = indexArticle ? indexArticle : parseArticleId(articleId);
+    const driveId = indexArticle?.driveId;
+    if (!driveId) {
+      // abort the process
+      throw new NotImplemetedCaseError();
+    }
 
     const text = await driveApi.getTextFileContent(accessToken, driveId).catch((error) => {
       logError(error, `${process} - failed to load article content`, entity);
@@ -109,12 +136,21 @@ export function getArticleContentProcess({
     });
 
     logDebug(`${process} - article parsing`, { entity, payload: { articleId } });
-    const article = articleService.parseArticle({ driveId, path, name, text, pathTopic: path[1] });
+    const {
+      articleId: parsedArticleId,
+      article,
+      content,
+    } = parseArticle({ driveId, path, name, text, pathTopic: path[1] });
+
+    if (articleId !== parsedArticleId) {
+      throw new UnexpectedArticleHasBeenLoadedError(articleId, parsedArticleId);
+    }
 
     logDebug(`${process} - updating store`, { entity, payload: { article } });
-    vaultIndexStore.indexArticle(article);
+    vault.addArticle({ articleId, article });
+    cache.cacheArticle({ articleId, content });
 
     logDebug(`${process} - finish`, { entity });
-    return article.content;
+    return content;
   };
 }

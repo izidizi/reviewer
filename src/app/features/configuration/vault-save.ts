@@ -20,7 +20,8 @@ import { StatisticsStore } from '../../store/statistics/statistics.store';
 import { SaveConfigufationProcess } from '../../processes/save-configuration.process';
 import { DefaultErrorsProcess } from '../../processes/default-errors.process';
 import { NotificationService } from '../../services/notification.service';
-import { VaultIndexStore } from '../../store/vault-index/vault-index.store';
+import { VaultStore } from '../../store/vault/vault.store';
+import { VaultStateStore } from '../../store/vault-state/vault-state.store';
 
 const place = 'AppVaultSaveComponent';
 @Component({
@@ -38,9 +39,9 @@ const place = 'AppVaultSaveComponent';
       </mat-card-header>
       <mat-card-content>
         <p>Vault configuration changes: {{ configurationStore.isUpdated() ? 'yes' : 'no' }}</p>
-        <p>Vault index changes: {{ vaultIndexStore.isUpdated() ? 'yes' : 'no' }}</p>
+        <p>Vault index changes: {{ vaultStateStore.hasChanges() ? 'yes' : 'no' }}</p>
         <p>Review configuration changes: {{ exerciseStore.isUpdated() ? 'yes' : 'no' }}</p>
-        <p>Statistics changes: {{ statisticsStore.isUpdated() ? 'yes' : 'no' }}</p>
+        <p>Statistics changes: {{ vaultStateStore.hasChanges() ? 'yes' : 'no' }}</p>
       </mat-card-content>
       <mat-card-actions>
         <button type="button" matButton (click)="onVaultSave()">Save</button>
@@ -54,7 +55,7 @@ export class AppVaultSaveComponent {
   readonly configurationStore = inject(ConfigurationStore);
   readonly exerciseStore = inject(ExerciseStore);
   readonly statisticsStore = inject(StatisticsStore);
-  readonly vaultIndexStore = inject(VaultIndexStore);
+  readonly vaultStateStore = inject(VaultStateStore);
 
   readonly saveConfigurationProcess = inject(SaveConfigufationProcess);
   readonly defaultErrorsProcess = inject(DefaultErrorsProcess);

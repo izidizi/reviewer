@@ -1,6 +1,0 @@
-<h3>Index</h3>
-<ul>
-  @for (article of articles(); track $index) {
-    <li>[{{article.exists ? 'x' : 'o'}}]&nbsp;{{article.articleId}}</li>
-  }
-</ul>

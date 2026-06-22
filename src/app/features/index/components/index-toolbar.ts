@@ -4,9 +4,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { ConfigurationStore } from '../../../store/configuration/configuration.store';
 import { NotificationService } from '../../../services/notification.service';
-import { VaultIndexAllProcess, VaultIndexMissingProcess } from '../../../processes/vault';
 import { createPath } from '../../../model/path';
 import { DefaultErrorsProcess } from '../../../processes/default-errors.process';
+import { IndexVaultScenario } from '../../../scenarios/index-vault';
+import { logAction } from '../../../../services/debug-logger';
 
 @Component({
   selector: 'app-index-toolbar',
@@ -36,18 +37,21 @@ import { DefaultErrorsProcess } from '../../../processes/default-errors.process'
 })
 export class AppIndexToolbar {
   readonly configurationStore = inject(ConfigurationStore);
-  readonly indexVaultProcess = inject(VaultIndexAllProcess);
-  readonly vaultIndexMissingProcess = inject(VaultIndexMissingProcess);
+  readonly indexVault = inject(IndexVaultScenario);
+  readonly indexVaultScenario = inject(IndexVaultScenario);
   readonly defaultErrorProcess = inject(DefaultErrorsProcess);
   readonly notificationService = inject(NotificationService);
 
   readonly title = computed(() => {
-    return `Vault: ${createPath(this.configurationStore.vaultRootPath())}`;
+    return `Vault: ${createPath(this.configurationStore.vaultRootPath())} 🡆 path: /${createPath(this.configurationStore.path())}`;
   });
 
   onRefresh() {
+    logAction(`index missing`, 'AppIndexComponent - AppIndexToolbar');
     const reindexThreshold = Date.now() - 14 * 24 * 60 * 60 * 1000;
-    this.vaultIndexMissingProcess({
+
+    this.indexVaultScenario({
+      mode: 'missing',
       reindexArticlesWithInvalidIndexDate: true,
       reindexArticlesOlderThan: new Date(reindexThreshold),
     }).catch(async (error) => {

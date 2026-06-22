@@ -14,3 +14,9 @@ export class ProcessUnhandledError extends ProcessError {
     super({ process, message: 'unhandled process error', cause });
   }
 }
+
+export class ProcessNotImplementedError extends ProcessError {
+  constructor({ process }: { process: string }) {
+    super({ process, message: 'not implemented' });
+  }
+}

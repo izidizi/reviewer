@@ -7,7 +7,6 @@ import { ProcessError, ProcessUnhandledError } from '../../model/error/process-e
 import { ZipService } from '../../services/zip/zip.service';
 import { ConfigurationStore } from '../store/configuration/configuration.store';
 import { VaultConfigurationStorage } from '../../model/storage/configuration';
-import { VaultIndexStore } from '../store/vault-index/vault-index.store';
 import {
   VaultIndexExerciseConfiguration,
   VaultIndexArticleStorage,
@@ -19,6 +18,10 @@ import { dateToISO80601String } from '../../model/utils';
 import { file } from 'jszip';
 import { GetFileDriveIdProcess } from './drive';
 import { assertValidVaultFile } from '../model/vault-file';
+import { VaultStore } from '../store/vault/vault.store';
+import { VaultStateStore } from '../store/vault-state/vault-state.store';
+import { ReviewStorage } from '../../model/storage/review';
+import { ArticleId } from '../model/article-id';
 
 export class NoConfigurationError extends ProcessError {
   constructor() {
@@ -47,7 +50,8 @@ export const SaveConfigufationProcess = new InjectionToken<SaveConfigufationProc
       const zipService = inject(ZipService);
       const driveApi = inject(DriveApiService);
       const configurationStore = inject(ConfigurationStore);
-      const vaultIndexStore = inject(VaultIndexStore);
+      const vaultStore = inject(VaultStore);
+      const vaultStateStore = inject(VaultStateStore);
       const statisticsStore = inject(StatisticsStore);
       const exerciseStore = inject(ExerciseStore);
       const logoutProcess = inject(LogoutProcess);
@@ -58,7 +62,8 @@ export const SaveConfigufationProcess = new InjectionToken<SaveConfigufationProc
         zipService,
         driveApi,
         configurationStore,
-        vaultIndexStore,
+        vaultStore,
+        vaultStateStore,
         statisticsStore,
         exerciseStore,
         logoutProcess,
@@ -73,8 +78,8 @@ function saveConfigurationProcess({
   zipService,
   driveApi,
   configurationStore,
-  statisticsStore,
-  vaultIndexStore,
+  vaultStore,
+  vaultStateStore,
   exerciseStore,
   logoutProcess,
   checkAuthProcess,
@@ -83,7 +88,8 @@ function saveConfigurationProcess({
   zipService: ZipService;
   driveApi: DriveApiService;
   configurationStore: ConfigurationStore;
-  vaultIndexStore: VaultIndexStore;
+  vaultStore: VaultStore;
+  vaultStateStore: VaultStateStore;
   statisticsStore: StatisticsStore;
   exerciseStore: ExerciseStore;
   logoutProcess: LogoutProcess;
@@ -119,7 +125,7 @@ function saveConfigurationProcess({
         path: configurationStore.path().join('/'),
       };
 
-      const articles = vaultIndexStore.articles();
+      const articles = vaultStore.articlesIndex();
       const exerciseConfiguration: VaultIndexExerciseConfiguration = {
         startDate: dateToISO80601String(exerciseStore.startDate()),
         includeTags: exerciseStore.includeTags(),
@@ -134,19 +140,21 @@ function saveConfigurationProcess({
           .map((article): VaultIndexArticleStorage | null => {
             if (!article) return null;
             return {
-              driveId: article.driveId,
-              path: article.path.join('/'),
-              name: article.name,
-              topics: article.topics,
-              tags: article.tags,
-              indexed: dateToISO80601String(article.indexed),
+              ...article,
             };
           })
           .filter((article) => article !== null),
         exerciseConfiguration,
       };
 
-      const resultsStorage = statisticsStore.reviews();
+      const reviews = vaultStore.reviewsIndex();
+      const reviewIds: ArticleId[] = Object.keys(reviews) as ArticleId[];
+      const resultsStorage = reviewIds
+        .map((articleId): [articleId: string, reviews: ReviewStorage[]] | null =>
+          !!reviews[articleId] ? [articleId, reviews[articleId]] : null,
+        )
+        .filter((item): item is [articleId: string, reviews: ReviewStorage[]] => !!item)
+        .reduce<ReviewStorage[]>((result, [articleId, reviews]) => [...result, ...reviews], []);
 
       const data = await zipService.zipFiles([
         { name: 'configuration.json', content: JSON.stringify(configurationStorage) },
@@ -156,8 +164,7 @@ function saveConfigurationProcess({
 
       driveApi.uploadBlobFile(accessToken, pathDriveId, configurationFileName, data);
 
-      statisticsStore.resetIsUpdated();
-      vaultIndexStore.resetIsUpdated();
+      vaultStateStore.setHasChanges({ hasChanges: false });
       configurationStore.resetIsUpdated();
       exerciseStore.resetIsUpdated();
     } catch (error) {

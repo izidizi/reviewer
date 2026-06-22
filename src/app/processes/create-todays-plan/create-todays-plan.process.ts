@@ -1,28 +1,43 @@
 import { StatisticsStore } from '../../store/statistics/statistics.store';
 import { ExerciseStore } from '../../store/exercise/exercise.store';
-import { CreateTodaysPlan } from '.';
-import { VaultIndexStore } from '../../store/vault-index/vault-index.store';
+import { CreateTodaysPlanProcess } from '.';
 import { findArticles } from './find-articles';
 import { isToday } from '../../helpers';
 import { ReviewResultPositive } from '../../model/review-result';
+import { logDebug } from '../../../services/debug-logger';
+import { VaultStore } from '../../store/vault/vault.store';
+import { ArticleId } from '../../model/article-id';
 
+const process = 'CreateTodaysPlanProcess';
 export function createTodaysPlanProcess({
-  vaultIndexStore,
+  vaultStore,
   statisticsStore,
   exerciseStore,
 }: {
-  vaultIndexStore: VaultIndexStore;
+  vaultStore: VaultStore;
   statisticsStore: StatisticsStore;
   exerciseStore: ExerciseStore;
-}): CreateTodaysPlan {
+}): CreateTodaysPlanProcess {
   return () => {
+    logDebug(`${process} - start`, { includeStack: true });
+
+    // article disappears after review
+    if (
+      exerciseStore.todayNew().length > 0 ||
+      exerciseStore.todayRepeat().length > 0 ||
+      exerciseStore.todayConsolidate().length > 0
+    ) {
+      logDebug(`${process} - early exit, plan already exists`, { includeStack: true });
+      return;
+    }
+
     const configuration = exerciseStore.configuration();
 
-    const articlesIndex = vaultIndexStore.articles();
-    const articles = findArticles(
-      configuration,
-      Object.values(articlesIndex).filter((article) => !!article),
-    );
+    const articlesIndex = Object.keys(vaultStore.articlesIndex())
+      .filter((articleId): articleId is ArticleId => true)
+      .map((articleId) => vaultStore.article(articleId)())
+      .filter((article) => !!article);
+    const articles = findArticles(configuration, articlesIndex);
 
     const articleStatistics = statisticsStore.articles();
     const exerciseStatistics = statisticsStore.exercises();
@@ -142,5 +157,7 @@ export function createTodaysPlanProcess({
       todayRepeat,
       todayConsolidate,
     });
+
+    logDebug(`${process} - finish`);
   };
 }

@@ -6,16 +6,12 @@ import { VaultArticleStatistics } from '../../model/vault-article-statistics';
 import { VaultDayStatistics } from '../../model/vault-day-statistics';
 
 export type StatisticsSlice = {
-  isUpdated: boolean;
-  reviews: ReviewStorage[];
   articles: { [acticleId: ArticleId]: VaultArticleStatistics | undefined };
   exercises: { [articleId: ArticleId]: VaultArticleExerciseStat | undefined };
   days: { [date: ISO8601DateString]: VaultDayStatistics | undefined };
 };
 
 export const initialStatisticsSlice: StatisticsSlice = {
-  isUpdated: false,
-  reviews: [],
   articles: {},
   exercises: {},
   days: {},

@@ -1,9 +1,8 @@
 import { Component, HostListener, inject, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ThemeService } from '../services/theme/theme.service';
-import { StatisticsStore } from './store/statistics/statistics.store';
-import { VaultIndexStore } from './store/vault-index/vault-index.store';
 import { ConfigurationStore } from './store/configuration/configuration.store';
+import { VaultStateStore } from './store/vault-state/vault-state.store';
 
 @Component({
   selector: 'app-root',
@@ -13,17 +12,12 @@ import { ConfigurationStore } from './store/configuration/configuration.store';
 })
 export class App implements OnInit {
   readonly themeService = inject(ThemeService);
-  readonly statisticsStore = inject(StatisticsStore);
-  readonly vaultIndexStore = inject(VaultIndexStore);
+  readonly vaultStateStore = inject(VaultStateStore);
   readonly configurationStore = inject(ConfigurationStore);
 
   @HostListener('window:beforeunload', ['$event'])
   unloadNotification($event: BeforeUnloadEvent): void {
-    if (
-      this.statisticsStore.isUpdated() ||
-      this.vaultIndexStore.isUpdated() ||
-      this.configurationStore.isUpdated()
-    ) {
+    if (this.vaultStateStore.hasChanges() || this.configurationStore.isUpdated()) {
       $event.preventDefault();
     }
   }

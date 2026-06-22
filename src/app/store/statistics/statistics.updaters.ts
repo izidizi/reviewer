@@ -1,69 +1,26 @@
 import { PartialStateUpdater } from '@ngrx/signals';
-import { StatisticsSlice } from './statistics.slice';
-import { ReviewStorage } from '../../../model/storage/review';
 import { VaultArticleStatistics } from '../../model/vault-article-statistics';
+import { StatisticsSlice } from './statistics.slice';
+import { VaultArticleExerciseStat } from '../../model/vault-article-exercise-stat';
+import { VaultDayStatistics } from '../../model/vault-day-statistics';
 
-export const setReviews: (reviews: ReviewStorage[]) => PartialStateUpdater<StatisticsSlice> = (
-  reviews,
-) => {
-  return () => ({
-    isUpdated: false,
-    reviews,
+export type SetArticleData = { articleStatistics: VaultArticleStatistics };
+export const setArticle: (data: SetArticleData) => PartialStateUpdater<StatisticsSlice> =
+  ({ articleStatistics }) =>
+  (state) => ({
+    articles: { ...state.articles, [articleStatistics.articleId]: articleStatistics },
   });
-};
 
-export const addReview: (review: ReviewStorage) => PartialStateUpdater<StatisticsSlice> = (
-  review,
-) => {
-  return (state) => ({
-    isUpdated: true,
-    reviews: [...state.reviews, review],
+export type SetExerciseData = { exerciseStatistics: VaultArticleExerciseStat };
+export const setExercise: (data: SetExerciseData) => PartialStateUpdater<StatisticsSlice> =
+  ({ exerciseStatistics }) =>
+  (state) => ({
+    exercises: { ...state.exercises, [exerciseStatistics.articleId]: exerciseStatistics },
   });
-};
 
-export const setIsUpdated: () => PartialStateUpdater<StatisticsSlice> = () => {
-  return () => ({
-    isUpdated: true,
+export type SetDayData = { dayStatistics: VaultDayStatistics };
+export const setDay: (data: SetDayData) => PartialStateUpdater<StatisticsSlice> =
+  ({ dayStatistics }) =>
+  (state) => ({
+    days: { ...state.days, [dayStatistics.date]: dayStatistics },
   });
-};
-
-export const resetIsUpdated: () => PartialStateUpdater<StatisticsSlice> = () => {
-  return () => ({
-    isUpdated: false,
-  });
-};
-
-export const setArticleStatistics: (
-  articles: StatisticsSlice['articles'],
-) => PartialStateUpdater<StatisticsSlice> = (articles) => {
-  return () => ({
-    articles,
-  });
-};
-
-export const patchArticleStatistics: (
-  articleStatistics: VaultArticleStatistics,
-) => PartialStateUpdater<StatisticsSlice> = (articleStatistics) => {
-  return (state) => ({
-    articles: {
-      ...state.articles,
-      [articleStatistics.articleId]: articleStatistics,
-    },
-  });
-};
-
-export const setExerciseStatistics: (
-  exercises: StatisticsSlice['exercises'],
-) => PartialStateUpdater<StatisticsSlice> = (exercises) => {
-  return () => ({
-    exercises,
-  });
-};
-
-export const setDayStatistics: (
-  days: StatisticsSlice['days'],
-) => PartialStateUpdater<StatisticsSlice> = (days) => {
-  return () => ({
-    days,
-  });
-};

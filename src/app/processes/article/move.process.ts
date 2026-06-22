@@ -1,25 +1,31 @@
 import { StatisticsStore } from '../../store/statistics/statistics.store';
 import { ExerciseStore } from '../../store/exercise/exercise.store';
 import { MoveArticleProcess } from '.';
-import { VaultIndexStore } from '../../store/vault-index/vault-index.store';
 import { ArticleId } from '../../model/article-id';
 import { createPath } from '../../model/path';
-import { ProcessError } from '../../../model/error/process-error';
+import { ProcessError, ProcessNotImplementedError } from '../../../model/error/process-error';
 import { ParseArticleIdBL } from '../../process-bl';
+import { VaultStore } from '../../store/vault/vault.store';
+import { VaultStateStore } from '../../store/vault-state/vault-state.store';
+import { CacheStore } from '../../store/cache/cache.store';
 
 export class InvalidArticleIdError extends ProcessError {
   constructor(articleId: ArticleId) {
-    super({ process: 'moveArticleProcess', message: `[${articleId}] is not found` });
+    super({ process, message: `[${articleId}] is not found` });
   }
 }
+
+const process = 'moveArticleProcess';
 export function moveArticleProcess({
-  vaultIndexStore,
-  statisticsStore,
+  vault,
+  vaultState,
+  cache,
   exerciseStore,
   parseArticleId,
 }: {
-  vaultIndexStore: VaultIndexStore;
-  statisticsStore: StatisticsStore;
+  vault: VaultStore;
+  vaultState: VaultStateStore;
+  cache: CacheStore;
   exerciseStore: ExerciseStore;
   parseArticleId: ParseArticleIdBL;
 }): MoveArticleProcess {
@@ -27,20 +33,22 @@ export function moveArticleProcess({
     const { path: fromPath, name: fromName } = parseArticleId(from);
     const { path: toPath, name: toName } = parseArticleId(to);
 
-    if (!fromName || !vaultIndexStore.articles[from]) throw new InvalidArticleIdError(from);
-    if (!toName || !vaultIndexStore.articles[to]) throw new InvalidArticleIdError(to);
+    if (!fromName || !vault.articlesIndex[from]) throw new InvalidArticleIdError(from);
+    if (!toName || !vault.articlesIndex[to]) throw new InvalidArticleIdError(to);
 
-    const reviews = statisticsStore.reviews().map((review) => {
-      if (review.path !== createPath(fromPath) || review.name !== fromName) return review;
+    throw new ProcessNotImplementedError({ process });
 
-      return {
-        ...review,
-        path: createPath(toPath),
-        name: toName,
-      };
-    });
-    statisticsStore.setReviews(reviews);
-    statisticsStore.setIsUpdated();
+    // const reviews = statisticsStore.reviews().map((review) => {
+    //   if (review.path !== createPath(fromPath) || review.name !== fromName) return review;
+
+    //   return {
+    //     ...review,
+    //     path: createPath(toPath),
+    //     name: toName,
+    //   };
+    // });
+    // statisticsStore.setReviews(reviews);
+    // statisticsStore.setIsUpdated();
 
     // TODO: update statisticsStore.articles
     // TODO: update statisticsStore.exercises
@@ -49,6 +57,6 @@ export function moveArticleProcess({
     // TODO: update exerciseStore.todayRepeat
     // TODO: update exerciseStore.todayConsolidate
 
-    vaultIndexStore.deleteArticle(from);
+    // vaultIndexStore.deleteArticle(from);
   };
 }

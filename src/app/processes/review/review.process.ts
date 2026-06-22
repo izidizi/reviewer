@@ -1,50 +1,42 @@
-import { StatisticsStore } from '../../store/statistics/statistics.store';
 import { ExerciseStore } from '../../store/exercise/exercise.store';
-import { VaultIndexStore } from '../../store/vault-index/vault-index.store';
 import { ReviewProcess } from '.';
-import { ReviewStorage } from '../../../model/storage/review';
 import { ArticleId } from '../../model/article-id';
 import { ProcessError } from '../../../model/error/process-error';
 import { createPath } from '../../model/path';
-import { dateToISO80601String, ISO8601String } from '../../../model/utils';
-import { ResultsService } from '../../../services/results/results.service';
+import { EnqueueReviewLogic } from '../../process-bl/enqueue-review';
+import { logDebug } from '../../../services/debug-logger';
+import { VaultStore } from '../../store/vault/vault.store';
 
 export class ArticleNotFound extends ProcessError {
   constructor(articleId: ArticleId) {
-    super({ process: 'ReviewProcess', message: `[${articleId}] is not found` });
+    super({ process, message: `[${articleId}] is not found` });
   }
 }
 
+const process = 'ReviewProcess';
 export function reviewProcess({
-  vaultIndexStore,
-  statisticsStore,
+  vaultStore,
   exerciseStore,
-  resultsService,
+  enqueueReview,
 }: {
-  vaultIndexStore: VaultIndexStore;
-  statisticsStore: StatisticsStore;
+  vaultStore: VaultStore;
   exerciseStore: ExerciseStore;
-  resultsService: ResultsService;
+  enqueueReview: EnqueueReviewLogic;
 }): ReviewProcess {
   return (articleId, result) => {
-    const article = vaultIndexStore.articles()[articleId];
+    logDebug(`${process} - start`, {
+      includeStack: true,
+      entity: `[${articleId}] review ${result}`,
+    });
+
+    const article = vaultStore.article(articleId)();
     if (!article) throw new ArticleNotFound(articleId);
 
-    const review: ReviewStorage = {
+    enqueueReview(articleId, {
       name: article.name,
       path: createPath(article.path),
       result,
-      reviewed: dateToISO80601String(new Date()) as ISO8601String,
-    };
-
-    statisticsStore.addReview(review);
-
-    // statistics
-    const articleStatistics = resultsService.updateArticleStatistics(
-      review,
-      statisticsStore.articles()[articleId],
-    );
-    statisticsStore.addStatistics(articleStatistics);
+    });
 
     const todayNew = exerciseStore
       .todayNew()
@@ -61,5 +53,7 @@ export function reviewProcess({
       todayRepeat,
       todayConsolidate,
     });
+
+    logDebug(`${process} - finish`, { entity: `[${articleId}] review ${result}` });
   };
 }

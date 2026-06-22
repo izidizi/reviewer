@@ -1,4 +1,5 @@
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import * as updatersObsolete from './statistics-obsolete.updaters';
 import * as updaters from './statistics.updaters';
 import { initialStatisticsSlice, StatisticsSlice } from './statistics.slice';
 import { ReviewStorage } from '../../../model/storage/review';
@@ -11,20 +12,36 @@ export const StatisticsStore = signalStore(
   { providedIn: 'root' },
   withState(initialStatisticsSlice),
   withComputed((store) => statisticsDerived(store)),
+
+  withMethods((store) => ({
+    setArticle: (data: updaters.SetArticleData) => patchState(store, updaters.setArticle(data)),
+    setExercise: (data: updaters.SetExerciseData) => patchState(store, updaters.setExercise(data)),
+    setDay: (data: updaters.SetDayData) => patchState(store, updaters.setDay(data)),
+  })),
+
+  /* obsolete */
   withMethods((store) => {
     return {
-      setReviews: (reviews: ReviewStorage[]) => patchState(store, updaters.setReviews(reviews)),
-      addReview: (review: ReviewStorage) => patchState(store, updaters.addReview(review)),
-      setIsUpdated: () => patchState(store, updaters.setIsUpdated()),
-      resetIsUpdated: () => patchState(store, updaters.resetIsUpdated()),
+      /**
+       * @deprecated
+       */
       setArticleStatistics: (statistics: StatisticsSlice['articles']) =>
-        patchState(store, updaters.setArticleStatistics(statistics)),
+        patchState(store, updatersObsolete.setArticleStatistics(statistics)),
+      /**
+       * @deprecated
+       */
       addStatistics: (articleStatisics: VaultArticleStatistics) =>
-        patchState(store, updaters.patchArticleStatistics(articleStatisics)),
+        patchState(store, updatersObsolete.patchArticleStatistics(articleStatisics)),
+      /**
+       * @deprecated
+       */
       setExerciseStatistics: (statistics: StatisticsSlice['exercises']) =>
-        patchState(store, updaters.setExerciseStatistics(statistics)),
+        patchState(store, updatersObsolete.setExerciseStatistics(statistics)),
+      /**
+       * @deprecated
+       */
       setDayStatistics: (dayStatistics: StatisticsSlice['days']) =>
-        patchState(store, updaters.setDayStatistics(dayStatistics)),
+        patchState(store, updatersObsolete.setDayStatistics(dayStatistics)),
     };
   }),
 );

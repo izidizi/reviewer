@@ -1,9 +1,5 @@
 import { DriveApiService } from '../../../services/drive-api/drive-api.service';
-import { CheckAuthProcess } from '../check-auth.process';
 import { ConfigurationStore } from '../../store/configuration/configuration.store';
-import { ArticleService } from '../../../services/article/article.service';
-import { VaultIndexStore } from '../../store/vault-index/vault-index.store';
-import { VaultIndexMissingProcess } from '.';
 import { parsePath, Path } from '../../model/path';
 import {
   DriveApiAuthenticationError,
@@ -15,37 +11,46 @@ import { DecisionTableService } from '../../../services/decision-table.service';
 import { isValidDate } from '../../../model/utils/invalid-date';
 import { VaultArticle } from '../../model/vault-article';
 import { logDebug, logError } from '../../../services/debug-logger';
-import { UserNotAuthorised } from '../../process-bl';
-import { GetDirectoryDriveIdProcess } from '../drive';
+import { CheckAuthBL, UserNotAuthorised } from '../../process-bl';
+import { IndexVaultMissingProcess } from '.';
+import { GetDirectoryDriveIdProcess } from '../../processes/drive';
+import { VaultStore } from '../../store/vault/vault.store';
+import { VaultStateStore } from '../../store/vault-state/vault-state.store';
+import { IndexVaultStore } from './index-vault.store';
+import { ParseArticleLogic } from '../../process-bl/parse-article';
 
-const process = 'VaultIndexMissingProcess';
-export function valutlIndexMissingProcess({
+const process = 'IndexVaultMissingProcess';
+export function indexVaultMissingProcess({
   driveApi,
   decisionService,
-  articleService,
+  indexVaultStore,
+  vaultStore,
+  vaultStateStore,
   configurationStore,
-  vaultIndexStore,
-  checkAuthProcess,
+  checkAuthLogic,
   getDirectoryDriveIdProcess,
+  parseArticleLogic,
 }: {
   driveApi: DriveApiService;
   decisionService: DecisionTableService;
-  articleService: ArticleService;
+  indexVaultStore: IndexVaultStore;
+  vaultStore: VaultStore;
+  vaultStateStore: VaultStateStore;
   configurationStore: ConfigurationStore;
-  vaultIndexStore: VaultIndexStore;
-  checkAuthProcess: CheckAuthProcess;
+  checkAuthLogic: CheckAuthBL;
   getDirectoryDriveIdProcess: GetDirectoryDriveIdProcess;
-}): VaultIndexMissingProcess {
+  parseArticleLogic: ParseArticleLogic;
+}): IndexVaultMissingProcess {
   const shouldReindex = createReindexDecisionProcessor(decisionService);
 
   return async ({ reindexArticlesWithInvalidIndexDate, reindexArticlesOlderThan }) => {
     logDebug(`${process} - start`, { includeStack: true });
 
-    const accessToken = await checkAuthProcess();
+    const accessToken = await checkAuthLogic();
 
     const path: Path = configurationStore.path();
 
-    vaultIndexStore.startVaultIndex({ mode: 'new', started: new Date() });
+    indexVaultStore.start({ mode: 'new', started: new Date() });
 
     const rootId = await getDirectoryDriveIdProcess(accessToken, path);
 
@@ -83,13 +88,12 @@ export function valutlIndexMissingProcess({
     }
 
     let totalIndexed = 0;
-    const articles = vaultIndexStore.articles();
-
     for (const file of foundFiles) {
       const articleId = getArticleId(file.path, file.name);
+      const article = vaultStore.article(articleId)();
 
       const articleReindexRule = genereateArticleReindexRule(
-        articles[articleId],
+        article,
         reindexArticlesWithInvalidIndexDate,
         reindexArticlesOlderThan,
       );
@@ -121,7 +125,11 @@ export function valutlIndexMissingProcess({
       });
 
       if (fileContent !== null) {
-        const article = articleService.parseArticle({
+        const {
+          article: parseArticleId,
+          article,
+          content,
+        } = parseArticleLogic({
           ...file,
           driveId: file.id,
           text: fileContent,
@@ -129,17 +137,17 @@ export function valutlIndexMissingProcess({
         });
 
         totalIndexed += 1;
-        vaultIndexStore.indexArticle(article);
-        vaultIndexStore.updateVaultIndex({
-          lastIndexed: article.articleId,
+        vaultStore.addArticle({ articleId, article });
+        indexVaultStore.update({
+          lastIndexed: articleId,
           totalIndexed,
         });
 
-        logDebug(`${process} - article reindexed`, { entity: article.articleId, payload: article });
+        logDebug(`${process} - article reindexed`, { entity: articleId, payload: article });
       }
     }
 
-    vaultIndexStore.finishVaultIndex({
+    indexVaultStore.finish({
       status: 'ok',
       totalIndexed,
       finished: new Date(),
@@ -186,7 +194,7 @@ function createReindexDecisionProcessor(service: DecisionTableService) {
 }
 
 function genereateArticleReindexRule(
-  article: VaultArticle | undefined,
+  article: VaultArticle | null,
   reindexArticlesWithInvalidIndexDate: boolean,
   reindexArticlesOlderThan: Date = new Date(0),
 ): ArticleReindexRule {

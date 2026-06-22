@@ -5,9 +5,7 @@ import { ProcessError, ProcessUnhandledError } from '../../model/error/process-e
 import { ZipService } from '../../services/zip/zip.service';
 import { ConfigurationStore } from '../store/configuration/configuration.store';
 import { VaultConfigurationStorage } from '../../model/storage/configuration';
-import { VaultIndexStore } from '../store/vault-index/vault-index.store';
 import { VaultIndexStorage } from '../../model/storage/vault-index';
-import { VaultIndexSlice } from '../store/vault-index/vault-index.slice';
 import { ArticleId, getArticleId } from '../model/article-id';
 import { getDriveId } from '../model/drive-id';
 import { ResultsService } from '../../services/results/results.service';
@@ -16,9 +14,9 @@ import { StatisticsStore } from '../store/statistics/statistics.store';
 import { ExerciseSlice, initialExerciseSlice } from '../store/exercise/exercise.slice';
 import { ExerciseStore } from '../store/exercise/exercise.store';
 import { logDebug, logError } from '../../services/debug-logger';
-import { CheckAuthBL } from '../process-bl';
+import { CheckAuthBL, EnqueueLoadedReviewLogic } from '../process-bl';
 import { GetDirectoryDriveIdProcess } from './drive';
-import { parseDate } from '../../model/utils/invalid-date';
+import { VaultStore } from '../store/vault/vault.store';
 
 export class RootPathNotDefined extends ProcessError {
   constructor() {
@@ -55,11 +53,12 @@ export const LoadConfigurationProcess = new InjectionToken<LoadConfigurationProc
     factory: () => {
       const zipService = inject(ZipService);
       const driveApi = inject(DriveApiService);
+      const vaultStore = inject(VaultStore);
       const resultsService = inject(ResultsService);
       const configurationStore = inject(ConfigurationStore);
-      const vaultIndexStore = inject(VaultIndexStore);
       const statisticsStore = inject(StatisticsStore);
       const exerciseStore = inject(ExerciseStore);
+      const enqueueReview = inject(EnqueueLoadedReviewLogic);
       const checkAuthProcess = inject(CheckAuthBL);
       const getDirectoryDriveIdProcess = inject(GetDirectoryDriveIdProcess);
 
@@ -67,10 +66,11 @@ export const LoadConfigurationProcess = new InjectionToken<LoadConfigurationProc
         zipService,
         driveApi,
         resultsService,
+        vaultStore,
         configurationStore,
-        vaultIndexStore,
         statisticsStore,
         exerciseStore,
+        enqueueReview,
         checkAuthProcess,
         getDirectoryDriveIdProcess,
       });
@@ -83,20 +83,22 @@ function loadConfigurationProcess({
   zipService,
   driveApi,
   resultsService,
+  vaultStore,
   configurationStore,
   statisticsStore,
-  vaultIndexStore,
   exerciseStore,
+  enqueueReview,
   checkAuthProcess,
   getDirectoryDriveIdProcess,
 }: {
   zipService: ZipService;
   driveApi: DriveApiService;
   resultsService: ResultsService;
+  vaultStore: VaultStore;
   configurationStore: ConfigurationStore;
-  vaultIndexStore: VaultIndexStore;
   statisticsStore: StatisticsStore;
   exerciseStore: ExerciseStore;
+  enqueueReview: EnqueueLoadedReviewLogic;
   checkAuthProcess: CheckAuthBL;
   getDirectoryDriveIdProcess: GetDirectoryDriveIdProcess;
 }): LoadConfigurationProcess {
@@ -159,25 +161,17 @@ function loadConfigurationProcess({
 
       // index
       const vaultIndexStorage = configurationMap['index.json'] as VaultIndexStorage;
-      const articles: VaultIndexSlice['articles'] = {};
       vaultIndexStorage.articles.forEach(
         ({ driveId, path, name, topics: links, tags, indexed, created }) => {
           logDebug(`${process} - parsing article`, { entity: `${path}/${name}` });
           const articleId: ArticleId = getArticleId(path, name);
-          articles[articleId] = {
-            driveId: getDriveId(driveId),
+
+          vaultStore.addArticle({
             articleId,
-            path: parsePath(path),
-            name,
-            tags,
-            topics: links,
-            indexed: parseDate(indexed),
-            created: parseDate(created),
-            content: null,
-          };
+            article: { driveId, path, name, topics: links, tags, indexed, created },
+          });
         },
       );
-      vaultIndexStore.setArticles(articles);
 
       logDebug(`${process} - parsing exercise configuration`, {
         payload: { exerciseConfiguration: vaultIndexStorage.exerciseConfiguration },
@@ -195,10 +189,10 @@ function loadConfigurationProcess({
 
       // reviews
       logDebug(`${process} - parsing reviews`);
-      processReviews(configurationMap['results.json'] as ReviewStorage[], {
-        exerciseConfiguration,
-        resultsService,
-        statisticsStore,
+      const reviews = configurationMap['results.json'] as ReviewStorage[];
+      reviews.forEach((review) => {
+        const articleId = getArticleId(review.path, review.name);
+        enqueueReview(articleId, review);
       });
     } catch (error) {
       logError(
@@ -212,26 +206,4 @@ function loadConfigurationProcess({
 
     logDebug(`${process} - finish`);
   };
-}
-
-function processReviews(
-  reviews: ReviewStorage[],
-  {
-    statisticsStore,
-    resultsService,
-    exerciseConfiguration,
-  }: {
-    statisticsStore: StatisticsStore;
-    resultsService: ResultsService;
-    exerciseConfiguration: ExerciseSlice;
-  },
-) {
-  statisticsStore.setReviews(reviews);
-  const { articles, excersises, days } = resultsService.processResults(
-    reviews,
-    exerciseConfiguration,
-  );
-  statisticsStore.setArticleStatistics(articles);
-  statisticsStore.setExerciseStatistics(excersises);
-  statisticsStore.setDayStatistics(days);
 }

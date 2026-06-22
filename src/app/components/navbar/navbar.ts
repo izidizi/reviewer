@@ -6,8 +6,8 @@ import { logToConsole } from '../../../services/debug-logger';
 import { ConfigurationStore } from '../../store/configuration/configuration.store';
 import { ExerciseStore } from '../../store/exercise/exercise.store';
 import { StatisticsStore } from '../../store/statistics/statistics.store';
-import { VaultIndexStore } from '../../store/vault-index/vault-index.store';
 import { GoToProcess } from '../../processes/router';
+import { VaultStateStore } from '../../store/vault-state/vault-state.store';
 
 @Component({
   selector: 'app-navbar',
@@ -23,15 +23,14 @@ export class AppNavbarComponent {
   readonly configurationStore = inject(ConfigurationStore);
   readonly exerciseStore = inject(ExerciseStore);
   readonly statisticsStore = inject(StatisticsStore);
-  readonly vaultIndexStore = inject(VaultIndexStore);
+  readonly vaultStateStore = inject(VaultStateStore);
 
   readonly gotoProcess = inject(GoToProcess);
 
   readonly hasChanges = computed(() => {
     return this.configurationStore.isUpdated() ||
       this.exerciseStore.isUpdated() ||
-      this.statisticsStore.isUpdated() ||
-      this.vaultIndexStore.isUpdated()
+      this.vaultStateStore.hasChanges()
       ? '+'
       : undefined;
   });

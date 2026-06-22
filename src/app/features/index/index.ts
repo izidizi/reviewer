@@ -5,8 +5,6 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { VaultArticle } from '../../model/vault-article';
-import { VaultIndexStore } from '../../store/vault-index/vault-index.store';
 import { AppIndexToolbar } from './components/index-toolbar';
 import { ArticleId } from '../../model/article-id';
 import { isValidDate } from '../../../model/utils/invalid-date';
@@ -16,6 +14,8 @@ import { ArticleDetailsComponent } from './components/article-details';
 import { AppArticleScoreComponent } from '../../components/article-score/article-score';
 import { FeatureIndexStore } from './index.store';
 import { ViewportScroller } from '@angular/common';
+import { IndexVaultStore } from '../../scenarios/index-vault/index-vault.store';
+import { VaultStore } from '../../store/vault/vault.store';
 
 type IndexRecord = {
   position: number;
@@ -47,28 +47,29 @@ type IndexRecord = {
 export class AppIndexComponent implements OnInit {
   readonly scroller = inject(ViewportScroller);
 
-  readonly vaultIndexStore = inject(VaultIndexStore);
+  readonly vault = inject(VaultStore);
+  readonly indexVaultStore = inject(IndexVaultStore);
   readonly statisticsStore = inject(StatisticsStore);
   readonly featureIndexStore = inject(FeatureIndexStore);
 
   readonly filter = signal<string | null>(this.featureIndexStore.filter());
 
-  readonly isIndexProcessActive = this.vaultIndexStore.isIndexProcessActive;
+  readonly isIndexProcessActive = this.indexVaultStore.isIndexProcessActive;
   readonly dataSource = new MatTableDataSource<IndexRecord>();
 
   readonly dataSourceEffect = effect(() => {
     const articlesSet = new Set<ArticleId>();
 
-    Object.values(this.vaultIndexStore.articles())
-      .filter((article): article is VaultArticle => !!article)
-      .forEach(({ articleId }) => articlesSet.add(articleId));
+    Object.entries(this.vault.articlesIndex())
+      .filter(([x, article]) => !!article)
+      .forEach(([articleId]) => articlesSet.add(articleId as ArticleId));
 
     Object.values(this.statisticsStore.articles())
       .filter((article): article is VaultArticleStatistics => !!article)
       .forEach(({ articleId }) => articlesSet.add(articleId));
 
     this.dataSource.data = Array.from(articlesSet.values()).map((articleId, index) => {
-      const article = this.vaultIndexStore.articles()[articleId];
+      const article = this.vault.article(articleId)();
       const statistics = this.statisticsStore.articles()[articleId];
       const score = statistics?.score ?? null;
       const daysWithoutReview = statistics?.lastReviewInterval_days;
