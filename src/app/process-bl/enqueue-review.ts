@@ -25,6 +25,7 @@ export const EnqueueReviewLogic = new InjectionToken<EnqueueReviewLogic>('Enqueu
         reviewed: dateToISO80601String(new Date()) as ISO8601String,
       };
       const reviewsQueue = vaultState.reviewsQueue();
+      vaultState.setHasChanges({ hasChanges: true });
       vaultState.setReviewQueue({
         reviewsQueue: [...reviewsQueue, { reviewsQueueId, articleId, review }],
       });

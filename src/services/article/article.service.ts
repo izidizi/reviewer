@@ -51,7 +51,6 @@ export class ArticleService {
       topics,
       indexed: new Date(),
       created,
-      content,
     };
   }
 

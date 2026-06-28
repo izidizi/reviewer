@@ -10,9 +10,6 @@ export class VaultStateEffects {
   readonly processReviewQueue = inject(ProcessReviewQueueProcess);
 
   #reviewQueueEffect = effect(() => {
-    const reviewsQueue = this.store.reviewsQueue();
-    console.log('reviews added', reviewsQueue.length);
-
     this.processReviewQueue();
   });
 }

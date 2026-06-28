@@ -1,26 +1,13 @@
-import { Component, ChangeDetectionStrategy, inject, effect } from '@angular/core';
-import {
-  FormControl,
-  FormsModule,
-  ReactiveFormsModule,
-  FormBuilder,
-  FormGroup,
-  Validators,
-} from '@angular/forms';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 
 import { ConfigurationStore } from '../../store/configuration/configuration.store';
 import { ExerciseStore } from '../../store/exercise/exercise.store';
 import { MatCardModule } from '@angular/material/card';
-import { parsePath } from '../../model/path';
 import { logAction, logError } from '../../../services/debug-logger';
-import { StatisticsStore } from '../../store/statistics/statistics.store';
 import { SaveConfigufationProcess } from '../../processes/save-configuration.process';
 import { DefaultErrorsProcess } from '../../processes/default-errors.process';
 import { NotificationService } from '../../services/notification.service';
-import { VaultStore } from '../../store/vault/vault.store';
 import { VaultStateStore } from '../../store/vault-state/vault-state.store';
 
 const place = 'AppVaultSaveComponent';
@@ -54,7 +41,6 @@ export class AppVaultSaveComponent {
   readonly notificationService = inject(NotificationService);
   readonly configurationStore = inject(ConfigurationStore);
   readonly exerciseStore = inject(ExerciseStore);
-  readonly statisticsStore = inject(StatisticsStore);
   readonly vaultStateStore = inject(VaultStateStore);
 
   readonly saveConfigurationProcess = inject(SaveConfigufationProcess);

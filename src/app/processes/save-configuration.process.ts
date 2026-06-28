@@ -15,18 +15,18 @@ import {
 import { StatisticsStore } from '../store/statistics/statistics.store';
 import { ExerciseStore } from '../store/exercise/exercise.store';
 import { dateToISO80601String } from '../../model/utils';
-import { file } from 'jszip';
 import { GetFileDriveIdProcess } from './drive';
 import { assertValidVaultFile } from '../model/vault-file';
 import { VaultStore } from '../store/vault/vault.store';
 import { VaultStateStore } from '../store/vault-state/vault-state.store';
 import { ReviewStorage } from '../../model/storage/review';
 import { ArticleId } from '../model/article-id';
+import { logDebug } from '../../services/debug-logger';
 
 export class NoConfigurationError extends ProcessError {
   constructor() {
     super({
-      process: 'SaveConfigufationProcess',
+      process,
       message: `no configuration`,
     });
   }
@@ -35,12 +35,13 @@ export class NoConfigurationError extends ProcessError {
 export class ConfigurationIsReadonlyError extends ProcessError {
   constructor() {
     super({
-      process: 'SaveConfigufationProcess',
+      process,
       message: `configuration is readonly`,
     });
   }
 }
 
+const process = 'SaveConfigufationProcess';
 export type SaveConfigufationProcess = () => Promise<void>;
 export const SaveConfigufationProcess = new InjectionToken<SaveConfigufationProcess>(
   'SaveConfigufationProcess',
@@ -97,6 +98,7 @@ function saveConfigurationProcess({
   getFileDriveId: GetFileDriveIdProcess;
 }): SaveConfigufationProcess {
   return async () => {
+    logDebug(`${process} - start`, { includeStack: true });
     const accessToken = await checkAuthProcess();
 
     if (configurationStore.isLoaded() === false) {
@@ -176,5 +178,7 @@ function saveConfigurationProcess({
 
       throw new ProcessUnhandledError({ process: 'SaveConfigufationProcess', cause: error });
     }
+
+    logDebug(`${process} - finish`);
   };
 }

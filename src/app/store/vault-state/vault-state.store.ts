@@ -1,6 +1,8 @@
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import * as updaters from './vault-state.updaters';
 import { initialVaultStateSlice } from './vault-state.slice';
+import { computed, inject } from '@angular/core';
+import { ConfigurationStore } from '../configuration/configuration.store';
 
 export type VaultStateStore = InstanceType<typeof VaultStateStore>;
 
@@ -18,4 +20,15 @@ export const VaultStateStore = signalStore(
         patchState(store, updaters.setReviewsQueueId(data)),
     };
   }),
+
+  /**
+   * views
+   */
+  // withMethods((store) => {
+  //   const configuration = inject(ConfigurationStore);
+
+  //   return {
+  //     hasChanges: () => computed(() => store.hasChanges() || configuration.isUpdated()),
+  //   };
+  // }),
 );

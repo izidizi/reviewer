@@ -4,7 +4,6 @@ import { AppLoginComponent } from '../login/login';
 import { LoadConfigurationProcess } from '../../processes/load-configuration.process';
 import { SaveConfigufationProcess } from '../../processes/save-configuration.process';
 import { GetFileCapabilitiesProcess } from '../../processes/get-file-capabilities';
-import { CreateTodaysPlanProcess } from '../../processes/create-todays-plan';
 import { GetArticleContentProcess, MoveArticleProcess } from '../../processes/article';
 import { ReviewProcess } from '../../processes/review';
 import { ReviewGetNextArticleProcess } from '../../processes/review-get-next-article';
@@ -32,7 +31,6 @@ export class AppDebugComponent implements OnInit {
   readonly loadConfigurationProcess = inject(LoadConfigurationProcess);
   readonly saveConfigurationProcess = inject(SaveConfigufationProcess);
   readonly getFileCapabilities = inject(GetFileCapabilitiesProcess);
-  readonly createTodaysPlan = inject(CreateTodaysPlanProcess);
   readonly getArticleContentProcess = inject(GetArticleContentProcess);
   readonly reviewProcess = inject(ReviewProcess);
   readonly reviewGetNextArticleProcess = inject(ReviewGetNextArticleProcess);
@@ -81,11 +79,6 @@ export class AppDebugComponent implements OnInit {
   }
 
   async test() {
-    await this.createTodaysPlan();
-    console.log(`today's plan: new`, this.exerciseStore.todayNew());
-    console.log(`today's plan: repeat`, this.exerciseStore.todayRepeat());
-    console.log(`today's plan: consolidate`, this.exerciseStore.todayConsolidate());
-
     const articleId = this.reviewGetNextArticleProcess();
     this.articleId.set(articleId);
 

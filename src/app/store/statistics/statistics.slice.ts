@@ -1,4 +1,3 @@
-import { ReviewStorage } from '../../../model/storage/review';
 import { ISO8601DateString } from '../../../model/utils/iso8601-string';
 import { ArticleId } from '../../model/article-id';
 import { VaultArticleExerciseStat } from '../../model/vault-article-exercise-stat';

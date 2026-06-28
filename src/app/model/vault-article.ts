@@ -13,7 +13,6 @@ export type VaultArticle = {
   tags: string[];
   topics: string[];
   indexed: Date | InvalidDate;
-  content: string | null;
   created: Date | InvalidDate;
 };
 
@@ -36,6 +35,5 @@ export function createArticle({
     topics,
     indexed: parseDate(indexed),
     created: parseDate(created),
-    content: null,
   };
 }

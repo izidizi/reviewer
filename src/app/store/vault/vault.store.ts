@@ -1,16 +1,17 @@
+import { computed } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { initialVaultSlice } from './vault.slice';
 import * as updaters from './vault.updates';
 import { ArticleId } from '../../model/article-id';
-import { computed } from '@angular/core';
 import { createArticle, VaultArticle } from '../../model/vault-article';
+import { vaultDerived } from './vault.derived';
 
 export type VaultStore = InstanceType<typeof VaultStore>;
 
 export const VaultStore = signalStore(
   { providedIn: 'root' },
   withState(initialVaultSlice),
-  // withComputed((store) => vaultIndexDerived(store)),
+  withComputed((store) => vaultDerived(store)),
   withMethods((store) => {
     return {
       addArticle: (data: updaters.AddArticleData) => patchState(store, updaters.addArticle(data)),
@@ -30,7 +31,6 @@ export const VaultStore = signalStore(
     return {
       article: (articleId: ArticleId) =>
         computed((): VaultArticle | null => {
-          console.log(`compute VaultArticle for [${articleId}]`);
           const article = store.articlesIndex()[articleId];
           return article ? createArticle(article) : null;
         }),

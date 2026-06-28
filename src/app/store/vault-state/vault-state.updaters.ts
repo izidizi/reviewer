@@ -5,7 +5,7 @@ export type SetHasChangesData = Pick<VaultStateSlice, 'hasChanges'>;
 export const setHasChanges: (data: SetHasChangesData) => PartialStateUpdater<VaultStateSlice> =
   ({ hasChanges }) =>
   () => ({
-    hasChanges: true,
+    hasChanges,
   });
 
 export type SetReviewsQueueIdData = Pick<VaultStateSlice, 'reviewsQueueId'>;

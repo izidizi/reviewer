@@ -22,11 +22,18 @@ export type StackRecord = {
 
 const logRecords: DebugLogRecord[] = [];
 const states: { [name: string]: Signal<unknown> | undefined } = {};
+const stores: { [store: string]: { [item: string]: Signal<unknown> } } = {};
 
 export function registerStore(
   name: string,
-  store: { [name: string]: (...args: any[]) => unknown },
+  store: { [item: string]: (...args: any[]) => unknown },
 ) {
+  stores[name] = {};
+  Object.keys(store).forEach((key) => {
+    const item = store[key];
+    if (isSignal(item)) stores[name][key] = item;
+  });
+
   Object.keys(store).forEach((key) => {
     const item = store[key];
     if (isSignal(item)) states[`${name} -> ${key}`] = item;
@@ -290,7 +297,8 @@ type GlobalLogger = {
   logToConsole: () => void;
   logToConsoleBrief: (fromIndex?: number, count?: number) => void;
   logToConsoleRecord: (recordIndex: number) => void;
-  $state: (filter?: string | string[]) => { [name: string]: unknown };
+  $state: () => { [name: string]: unknown };
+  $stateDetails: (filter?: string | string[]) => { [name: string]: unknown };
 };
 const safeWindow = (globalThis ?? window) as unknown as GlobalLogger;
 safeWindow.logToConsole = logToConsole;
@@ -309,7 +317,16 @@ safeWindow.logToConsoleRecord = (index) => {
 safeWindow.logClear = () => {
   logRecords.length = 0;
 };
-safeWindow.$state = (filter) => {
+safeWindow.$state = () => {
+  const result: { [store: string]: { [state: string]: unknown } } = {};
+  Object.entries(stores).forEach(([storeName, store]) => {
+    result[storeName] = {};
+    Object.keys(store).forEach((key) => (result[storeName][key] = store[key]()));
+  });
+
+  return result;
+};
+safeWindow.$stateDetails = (filter) => {
   let result: Array<[string, Signal<unknown> | undefined]> = Object.keys(states).map((name) => [
     name,
     states[name]!,

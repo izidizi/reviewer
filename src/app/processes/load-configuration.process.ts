@@ -8,9 +8,7 @@ import { VaultConfigurationStorage } from '../../model/storage/configuration';
 import { VaultIndexStorage } from '../../model/storage/vault-index';
 import { ArticleId, getArticleId } from '../model/article-id';
 import { getDriveId } from '../model/drive-id';
-import { ResultsService } from '../../services/results/results.service';
 import { ReviewStorage } from '../../model/storage/review';
-import { StatisticsStore } from '../store/statistics/statistics.store';
 import { ExerciseSlice, initialExerciseSlice } from '../store/exercise/exercise.slice';
 import { ExerciseStore } from '../store/exercise/exercise.store';
 import { logDebug, logError } from '../../services/debug-logger';
@@ -54,9 +52,7 @@ export const LoadConfigurationProcess = new InjectionToken<LoadConfigurationProc
       const zipService = inject(ZipService);
       const driveApi = inject(DriveApiService);
       const vaultStore = inject(VaultStore);
-      const resultsService = inject(ResultsService);
       const configurationStore = inject(ConfigurationStore);
-      const statisticsStore = inject(StatisticsStore);
       const exerciseStore = inject(ExerciseStore);
       const enqueueReview = inject(EnqueueLoadedReviewLogic);
       const checkAuthProcess = inject(CheckAuthBL);
@@ -65,10 +61,8 @@ export const LoadConfigurationProcess = new InjectionToken<LoadConfigurationProc
       return loadConfigurationProcess({
         zipService,
         driveApi,
-        resultsService,
         vaultStore,
         configurationStore,
-        statisticsStore,
         exerciseStore,
         enqueueReview,
         checkAuthProcess,
@@ -82,10 +76,8 @@ const process = 'LoadConfigurationProcess';
 function loadConfigurationProcess({
   zipService,
   driveApi,
-  resultsService,
   vaultStore,
   configurationStore,
-  statisticsStore,
   exerciseStore,
   enqueueReview,
   checkAuthProcess,
@@ -93,10 +85,8 @@ function loadConfigurationProcess({
 }: {
   zipService: ZipService;
   driveApi: DriveApiService;
-  resultsService: ResultsService;
   vaultStore: VaultStore;
   configurationStore: ConfigurationStore;
-  statisticsStore: StatisticsStore;
   exerciseStore: ExerciseStore;
   enqueueReview: EnqueueLoadedReviewLogic;
   checkAuthProcess: CheckAuthBL;

@@ -1,10 +1,21 @@
-<h3>New</h3>
+<div class="header">
+  <h2>Today's plan</h2>
+  <div class="actions">
+    <button type="button" matIconButton [matBadge]="hasChanges() ? '+' : null" (click)="save()">
+      <mat-icon class="material-icons-outlined">file_upload</mat-icon>
+    </button>
+
+  </div>
+</div>
+
+<!-- NEW -->
+<h3>New ({{this.new().length}})</h3>
 <mat-list>
   @for (article of this.new(); track $index) {
     <a mat-list-item (click)="open(article.articleId)">
       <mat-icon
         matListItemIcon
-        [class]="['material-icons-outlined', article.result]"
+        [class]="['list-item-icon','material-icons-outlined', article.result]"
       >{{article.reviewed ? 'check_circle' : 'circle'}}</mat-icon>
       <div matListItemTitle>
         <app-article-score [score]="article.score" />
@@ -22,36 +33,13 @@
   }
 </mat-list>
 
-<h3>Repeat</h3>
+<h3>Repeat ({{this.repeat().length}})</h3>
 <mat-list>
   @for (article of this.repeat(); track $index) {
     <a mat-list-item (click)="open(article.articleId)">
       <mat-icon
         matListItemIcon
-        [class]="['material-icons-outlined', article.result]"
-      >{{article.reviewed ? 'check_circle' : 'circle'}}</mat-icon>
-      <div matListItemTitle>
-        <app-article-score [score]="article.score" />
-        {{article.articleId}}
-      </div>
-      @if (article.tags.length > 0) {
-        <div matListItemLine class="tags">
-          @for (tag of article.tags; track $index) {
-            <app-tag [tag]="tag" />
-          }
-        </div>
-      }
-    </a>
-  }
-</mat-list>
-
-<h3>Consolidate</h3>
-<mat-list>
-  @for (article of this.consolidate(); track $index) {
-    <a mat-list-item (click)="open(article.articleId)">
-      <mat-icon
-        matListItemIcon
-        [class]="['material-icons-outlined', article.result]"
+        [class]="['list-item-icon','material-icons-outlined', article.reviewed ? article.result : null]"
       >{{article.reviewed ? 'check_circle' : 'circle'}}</mat-icon>
       <div matListItemTitle>
         <app-article-score [score]="article.score" />

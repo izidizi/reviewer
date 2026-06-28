@@ -5,24 +5,37 @@ import { ArticleId, parseArticleId } from '../../model/article-id';
 import { Router } from '@angular/router';
 import { StatisticsStore } from '../../store/statistics/statistics.store';
 import { ExerciseStore } from '../../store/exercise/exercise.store';
-import { CreateTodaysPlanProcess } from '../../processes/create-todays-plan';
 import { AppTagComponent } from '../../components/tag/tag';
 import { isToday } from '../../helpers';
 import { ReviewResult, ReviewResultUnknown } from '../../model/review-result';
 import { StatisticsSlice } from '../../store/statistics/statistics.slice';
 import { DefaultErrorsProcess } from '../../processes/default-errors.process';
 import { NotificationService } from '../../services/notification.service';
-import { logAction } from '../../../services/debug-logger';
+import { logAction, logError } from '../../../services/debug-logger';
 import { AppArticleScoreComponent } from '../../components/article-score/article-score';
 import { FeaturePlanStore } from './plan.store';
 import { ViewportScroller } from '@angular/common';
 import { VaultStore } from '../../store/vault/vault.store';
 import { VaultSlice } from '../../store/vault/vault.slice';
+import { MatButtonModule } from '@angular/material/button';
+import { VaultStateStore } from '../../store/vault-state/vault-state.store';
+import { MatBadgeModule } from '@angular/material/badge';
+import { Selectors } from '../../store/selectors';
+import { SaveConfigufationProcess } from '../../processes/save-configuration.process';
+import { CreatePlanProcess } from '../../processes/create-plan';
+import { PlanStore } from '../../store/plan/plan.store';
 
 const place = 'AppPlanComponent';
 @Component({
   selector: 'app-plan',
-  imports: [MatIconModule, MatListModule, AppTagComponent, AppArticleScoreComponent],
+  imports: [
+    MatButtonModule,
+    MatIconModule,
+    MatBadgeModule,
+    MatListModule,
+    AppTagComponent,
+    AppArticleScoreComponent,
+  ],
   templateUrl: './plan.html',
   styleUrl: './plan.scss',
 })
@@ -30,41 +43,29 @@ export class AppPlanComponent implements OnInit {
   readonly router = inject(Router);
   readonly scroller = inject(ViewportScroller);
 
+  readonly selectors = inject(Selectors);
+  readonly planStore = inject(PlanStore);
+
   readonly vault = inject(VaultStore);
+  readonly vaultState = inject(VaultStateStore);
   readonly exerciseStore = inject(ExerciseStore);
   readonly statisticsStore = inject(StatisticsStore);
   readonly store = inject(FeaturePlanStore);
 
-  readonly createTodaysPlan = inject(CreateTodaysPlanProcess);
+  readonly createPlanProcess = inject(CreatePlanProcess);
   readonly defaultErrorsProcess = inject(DefaultErrorsProcess);
   readonly notificationService = inject(NotificationService);
 
   readonly new = computed(() => {
-    const articles = this.vault.articlesIndex();
-    const plannedNew = this.exerciseStore.todayNew();
-    const statistics = this.statisticsStore.articles();
-    const excersises = Object.values(this.statisticsStore.exercises());
+    const newList = this.planStore.newListArticles();
 
-    const reviewedNew = excersises
-      .filter((stat) => !!stat)
-      .filter(({ started }) => isToday(started))
-      .map(({ articleId }) => articleId);
-
-    return this.getArticleView(plannedNew, reviewedNew, articles, statistics);
+    return newList.sort((a, b) => (a.name < b.name ? -1 : 1));
   });
 
   readonly repeat = computed(() => {
-    const articles = this.vault.articlesIndex();
-    const plannedRepeat = this.exerciseStore.todayRepeat();
-    const statistics = this.statisticsStore.articles();
-    const excersises = Object.values(this.statisticsStore.exercises());
+    const newList = this.planStore.repeatListArticles();
 
-    const reviewedRepeat = excersises
-      .filter((stat) => !!stat)
-      .filter(({ repeates }) => repeates.find((date) => isToday(date)))
-      .map(({ articleId }) => articleId);
-
-    return this.getArticleView(plannedRepeat, reviewedRepeat, articles, statistics);
+    return newList.sort((a, b) => (a.name < b.name ? -1 : 1));
   });
 
   readonly consolidate = computed(() => {
@@ -90,11 +91,9 @@ export class AppPlanComponent implements OnInit {
 
   async ngOnInit() {
     try {
-      this.createTodaysPlan();
+      this.createPlanProcess();
     } catch (error) {
       if (await this.defaultErrorsProcess(error)) return;
-
-      // TODO: handle errors and return
 
       // default error behavior
       this.notificationService.showError(error);
@@ -128,5 +127,20 @@ export class AppPlanComponent implements OnInit {
           : ReviewResultUnknown,
         score: statistics[articleId]?.score ?? null,
       }));
+  }
+
+  readonly hasChanges = this.selectors.hasChanges;
+
+  readonly saveConfigurationProcess = inject(SaveConfigufationProcess);
+  save() {
+    logAction('save vault configuration form', place);
+
+    this.saveConfigurationProcess().catch(async (error) => {
+      logError(error, place);
+
+      if (await this.defaultErrorsProcess(error)) return;
+
+      this.notificationService.showError(error);
+    });
   }
 }
