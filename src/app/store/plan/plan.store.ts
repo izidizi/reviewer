@@ -5,6 +5,7 @@ import { StatisticsStore } from '../statistics/statistics.store';
 import { computed, inject } from '@angular/core';
 import { VaultStore } from '../vault/vault.store';
 import { isToday } from '../../helpers';
+import { reviewResultScore } from '../../model/review-result';
 
 export type PlanStore = InstanceType<typeof PlanStore>;
 
@@ -14,7 +15,6 @@ export const PlanStore = signalStore(
   withComputed((store) => {
     const vaultStore = inject(VaultStore);
     const statisticsStore = inject(StatisticsStore);
-
     return {
       newListArticles: computed(() => {
         const newList = store.newList();
@@ -57,6 +57,40 @@ export const PlanStore = signalStore(
               tags,
               result: articlesStatistics[articleId]?.lastResult,
               score: articlesStatistics[articleId]?.score,
+              lastScore: reviewResultScore(articlesStatistics[articleId]?.lastResult ?? 'unknown'),
+            };
+          });
+      }),
+
+      consolidateListArticles: computed(() => {
+        const consolidateList = store.consolidateList();
+        const articlesStatistics = statisticsStore.articles();
+        const articlesExercises = statisticsStore.exercises();
+
+        return consolidateList
+          .map((articleId) => vaultStore.article(articleId)())
+          .filter((article) => !!article)
+
+          .map(({ articleId, name, tags }) => {
+            const reviewed =
+              (articlesExercises[articleId]?.repeates ?? []).findIndex((reviewDate) =>
+                isToday(reviewDate),
+              ) >= 0 ||
+              (articlesExercises[articleId]?.consolidations ?? []).findIndex(({ date }) =>
+                isToday(date),
+              ) >= 0;
+            const daysWithoutReview = articlesStatistics[articleId]
+              ? articlesStatistics[articleId].lastReviewInterval_days.toFixed(0)
+              : '--';
+            return {
+              articleId,
+              reviewed,
+              name,
+              tags,
+              result: reviewed ? articlesStatistics[articleId]?.lastResult : null,
+              score: articlesStatistics[articleId]?.score,
+              lastScore: reviewResultScore(articlesStatistics[articleId]?.lastResult ?? 'unknown'),
+              daysWithoutReview,
             };
           });
       }),

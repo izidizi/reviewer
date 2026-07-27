@@ -42,7 +42,7 @@
         [class]="['list-item-icon','material-icons-outlined', article.reviewed ? article.result : null]"
       >{{article.reviewed ? 'check_circle' : 'circle'}}</mat-icon>
       <div matListItemTitle>
-        <app-article-score [score]="article.score" />
+        <app-article-score [score]="article.lastScore" />
         {{article.articleId}}
       </div>
       @if (article.tags.length > 0) {

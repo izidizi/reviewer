@@ -1,5 +1,5 @@
 import { inject, InjectionToken } from '@angular/core';
-import { ArticleId, getArticleId } from '../../app/model/article-id';
+import { ArticleId, generate } from '../model/article-id';
 import { createPath, isPath, parsePath, Path } from '../../app/model/path';
 import { parseDate } from '../../model/utils/invalid-date';
 import { VaultIndexArticleStorage } from '../../model/storage/vault-index';
@@ -49,7 +49,7 @@ export const ParseArticleLogic = new InjectionToken<ParseArticleLogic>('ParseArt
       };
 
       return {
-        articleId: getArticleId(path, name),
+        articleId: generate(isPath(path) ? path : parsePath(path), name),
         article,
         content,
       };

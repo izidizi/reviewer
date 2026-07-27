@@ -10,7 +10,25 @@
   <mat-label>Filter</mat-label>
   <input matInput (keyup)="applyFilter($event)">
 </mat-form-field>
+<mat-button-toggle-group name="noScore">
+  <mat-button-toggle value="true" (click)="filterNoScore(true)">No score</mat-button-toggle>
+  <mat-button-toggle value="false" (click)="filterNoScore(false)">All</mat-button-toggle>
+</mat-button-toggle-group>
+<button type="button" matButton (click)="clear()">Clear</button>
 
+@if (isRenderModeStatistics()) {
+  <app-index-statistics />
+}
+
+@if (renderFilterOverflow()) {
+  <app-index-overflow
+    [indexRecords]="articleIndexRecords().length"
+    [maxIndexRecords]="maxIndexRecords"
+    (renderRecords)="renderRecords()"
+  />
+}
+
+@if (renderFilter()) {
 <table mat-table [dataSource]="dataSource" multiTemplateDataRows class="mat-elevation-z8">
 
   <!-- Position Column -->
@@ -97,3 +115,6 @@
     <td class="no-data-cell" colspan="5">No articles matching the filter</td>
   </tr>
 </table>
+
+}
+

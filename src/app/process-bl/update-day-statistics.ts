@@ -1,9 +1,10 @@
 import { inject, InjectionToken } from '@angular/core';
-import { getArticleId } from '../model/article-id';
+import { generate } from '../model/article-id';
 import { ReviewStorage } from '../../model/storage/review';
 import { StatisticsStore } from '../store/statistics/statistics.store';
 import { isReviewResult, ReviewResultUnknown } from '../model/review-result';
 import { toISO6801DateString } from '../../model/utils/iso8601-string';
+import { getPath } from '../model/path';
 
 export type UpdateDayStatisticsLogic = (review: ReviewStorage) => void;
 export const UpdateDayStatisticsLogic = new InjectionToken<UpdateDayStatisticsLogic>(
@@ -24,7 +25,7 @@ export const UpdateDayStatisticsLogic = new InjectionToken<UpdateDayStatisticsLo
             reviews: [
               ...(dayStatistics?.reviews ?? []),
               {
-                articleId: getArticleId(review.path, review.name),
+                articleId: generate(getPath(review.path), review.name),
                 reviewed: new Date(review.reviewed),
                 result: review.result,
               },

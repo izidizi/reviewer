@@ -12,6 +12,8 @@ export const StatisticsStore = signalStore(
 
   withMethods((store) => ({
     setArticle: (data: updaters.SetArticleData) => patchState(store, updaters.setArticle(data)),
+    removeArticle: (data: updaters.RemoveArticleData) =>
+      patchState(store, updaters.removeArticle(data)),
     setExercise: (data: updaters.SetExerciseData) => patchState(store, updaters.setExercise(data)),
     setDay: (data: updaters.SetDayData) => patchState(store, updaters.setDay(data)),
   })),

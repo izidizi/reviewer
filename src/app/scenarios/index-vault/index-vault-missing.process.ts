@@ -1,12 +1,12 @@
 import { DriveApiService } from '../../../services/drive-api/drive-api.service';
 import { ConfigurationStore } from '../../store/configuration/configuration.store';
-import { parsePath, Path } from '../../model/path';
+import { getPath, parsePath, Path } from '../../model/path';
 import {
   DriveApiAuthenticationError,
   DriveApiFileNotFoundError,
   DriveApiUnexpectedAnswerError,
 } from '../../../services/drive-api/drive-api-errors';
-import { getArticleId } from '../../model/article-id';
+import { generate } from '../../model/article-id';
 import { DecisionTableService } from '../../../services/decision-table.service';
 import { isValidDate } from '../../../model/utils/invalid-date';
 import { VaultArticle } from '../../model/vault-article';
@@ -89,7 +89,7 @@ export function indexVaultMissingProcess({
 
     let totalIndexed = 0;
     for (const file of foundFiles) {
-      const articleId = getArticleId(file.path, file.name);
+      const articleId = generate(getPath(file.path), file.name);
       const article = vaultStore.article(articleId)();
 
       const articleReindexRule = genereateArticleReindexRule(
@@ -138,6 +138,7 @@ export function indexVaultMissingProcess({
 
         totalIndexed += 1;
         vaultStore.addArticle({ articleId, article });
+        vaultStateStore.setHasChanges({ hasChanges: true });
         indexVaultStore.update({
           lastIndexed: articleId,
           totalIndexed,

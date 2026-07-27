@@ -8,7 +8,7 @@ import {
   DriveApiFileNotFoundError,
   DriveApiUnexpectedAnswerError,
 } from '../../../services/drive-api/drive-api-errors';
-import { CheckAuthBL, UserNotAuthorised, ParseArticleIdBL } from '../../process-bl';
+import { CheckAuthBL, UserNotAuthorised, ParseArticleIdLogic } from '../../process-bl';
 import { VaultStore } from '../../store/vault/vault.store';
 import { VaultStateStore } from '../../store/vault-state/vault-state.store';
 import { CacheStore } from '../../store/cache/cache.store';
@@ -67,7 +67,7 @@ export function getArticleContentProcess({
   parseArticle,
 }: {
   driveApi: DriveApiService;
-  parseArticleId: ParseArticleIdBL;
+  parseArticleId: ParseArticleIdLogic;
   checkAuth: CheckAuthBL;
   vault: VaultStore;
   vaultState: VaultStateStore;

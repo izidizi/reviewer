@@ -18,3 +18,11 @@ export function isReviewResult(result: string): result is ReviewResult {
   ];
   return list.includes(result as ReviewResult);
 }
+
+export function reviewResultScore(reviewResult: ReviewResult): number {
+  if (reviewResult === 'positive') return 5;
+  if (reviewResult === 'incomplete') return 3;
+  if (reviewResult === 'negative') return 1;
+
+  return 0;
+}

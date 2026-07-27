@@ -1,12 +1,12 @@
 import { inject, InjectionToken } from '@angular/core';
 import { DriveApiService } from '../../services/drive-api/drive-api.service';
-import { parsePath, Path } from '../model/path';
+import { getPath, parsePath, Path } from '../model/path';
 import { ProcessError, ProcessUnhandledError } from '../../model/error/process-error';
 import { ZipService } from '../../services/zip/zip.service';
 import { ConfigurationStore } from '../store/configuration/configuration.store';
 import { VaultConfigurationStorage } from '../../model/storage/configuration';
 import { VaultIndexStorage } from '../../model/storage/vault-index';
-import { ArticleId, getArticleId } from '../model/article-id';
+import { ArticleId, generate } from '../model/article-id';
 import { getDriveId } from '../model/drive-id';
 import { ReviewStorage } from '../../model/storage/review';
 import { ExerciseSlice, initialExerciseSlice } from '../store/exercise/exercise.slice';
@@ -154,7 +154,7 @@ function loadConfigurationProcess({
       vaultIndexStorage.articles.forEach(
         ({ driveId, path, name, topics: links, tags, indexed, created }) => {
           logDebug(`${process} - parsing article`, { entity: `${path}/${name}` });
-          const articleId: ArticleId = getArticleId(path, name);
+          const articleId: ArticleId = generate(getPath(path), name);
 
           vaultStore.addArticle({
             articleId,
@@ -181,7 +181,7 @@ function loadConfigurationProcess({
       logDebug(`${process} - parsing reviews`);
       const reviews = configurationMap['results.json'] as ReviewStorage[];
       reviews.forEach((review) => {
-        const articleId = getArticleId(review.path, review.name);
+        const articleId = generate(getPath(review.path), review.name);
         enqueueReview(articleId, review);
       });
     } catch (error) {

@@ -3,7 +3,7 @@ import { ViewportScroller } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
 import { logAction } from '../../../../services/debug-logger';
-import { ParseArticleIdBL } from '../../../process-bl';
+import { ParseArticleIdLogic } from '../../../process-bl';
 import { ArticleId } from '../../../model/article-id';
 import { Router } from '@angular/router';
 import { FeatureIndexStore } from '../index.store';
@@ -62,7 +62,7 @@ export class ArticleViewHeader {
   readonly scroller = inject(ViewportScroller);
   readonly featureIndexStore = inject(FeatureIndexStore);
 
-  readonly parseArticleId = inject(ParseArticleIdBL);
+  readonly parseArticleId = inject(ParseArticleIdLogic);
 
   open() {
     this.featureIndexStore.setScroll(this.scroller.getScrollPosition());

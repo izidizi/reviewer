@@ -10,14 +10,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { Router } from '@angular/router';
-import { parserArticleIdFromURL } from '../../model/article-id';
+import { isValid } from '../../model/article-id';
 import { MarkdownComponent } from 'ngx-markdown';
 import { AppReviewButtonsComponent } from './components/review-buttons';
 import { ReviewResult, ReviewResultUnknown } from '../../model/review-result';
 import { StatisticsStore } from '../../store/statistics/statistics.store';
 import { isToday } from '../../helpers';
 import { ReviewProcess } from '../../processes/review';
-import { ParseArticleIdBL } from '../../process-bl';
+import { ParseArticleIdLogic, TryCreateArticleIdFromStringLogic } from '../../process-bl';
 import { NotificationService } from '../../services/notification.service';
 import { LoadArticleContentScenario } from './scenarios/get-article-content';
 import { ThemeService } from '../../../services/theme/theme.service';
@@ -54,25 +54,30 @@ export class AppReviewComponent implements OnInit {
   readonly cache = inject(CacheStore);
   readonly statisticsStore = inject(StatisticsStore);
   readonly notificationService = inject(NotificationService);
-  readonly parseArticleId = inject(ParseArticleIdBL);
+  readonly tryCreateArticleIdFromString = inject(TryCreateArticleIdFromStringLogic);
+  readonly parseArticleId = inject(ParseArticleIdLogic);
   readonly reviewProcess = inject(ReviewProcess);
   readonly loadArticleContentLogic = inject(LoadArticleContentScenario);
   readonly gotoLastUrl = inject(GoToLastUrlProcess);
-
-  readonly urlTree = this.router.parseUrl(this.router.url);
 
   readonly themeClass = computed(() => {
     const colorScheme = this.themeService.colorScheme();
     return colorScheme === 'dark' ? 'dark' : '';
   });
 
+  public get articleUrl(): string {
+    let url = decodeURI(this.router.parseUrl(this.router.url).toString());
+    url = url.indexOf('/') === 0 ? url.slice(1) : url;
+    return url;
+  }
+
   /**
    * articleId
    */
-  readonly articleId = signal(parserArticleIdFromURL(this.urlTree.toString()));
+  readonly articleId = signal(this.tryCreateArticleIdFromString(this.articleUrl));
   readonly article = computed(() => {
     const articleId = this.articleId();
-    if (!articleId) return null;
+    if (!isValid(articleId)) return null;
 
     try {
       this.parseArticleId(articleId);
@@ -86,19 +91,18 @@ export class AppReviewComponent implements OnInit {
    * title
    */
   readonly title = computed(() => {
+    const articleId = this.articleId();
+    if (!isValid(articleId)) return '';
+
     const article = this.article();
     if (!article) return '';
 
-    const articleId = this.articleId();
-    if (!articleId) return '';
-
-    const { name } = this.parseArticleId(articleId);
-    return name.replace('.md', '');
+    return article.name.replace('.md', '');
   });
 
   readonly articleContent = computed(() => {
     const articleId = this.articleId();
-    if (articleId === null) return '### failed to load article content, unknown article';
+    if (!isValid(articleId)) return '### failed to load article content, unknown article';
 
     const isLoading = this.isLoading();
     if (isLoading) return '### loading...';
@@ -109,7 +113,7 @@ export class AppReviewComponent implements OnInit {
 
   readonly articleTopics = computed(() => {
     const articleId = this.articleId();
-    if (articleId === null) return [];
+    if (!isValid(articleId)) return [];
 
     const articlesIndex = this.vault.articlesIndex();
     if (!articlesIndex[articleId]?.topics) return [];
@@ -119,7 +123,7 @@ export class AppReviewComponent implements OnInit {
 
   readonly reviewResult = computed<ReviewResult | null>(() => {
     const articleId = this.articleId();
-    if (articleId === null) return null;
+    if (!isValid(articleId)) return null;
 
     const articlesIndex = this.statisticsStore.articles();
     const statistics = articlesIndex[articleId];
@@ -140,7 +144,7 @@ export class AppReviewComponent implements OnInit {
 
   readonly articleStatists = computed(() => {
     const articleId = this.articleId();
-    if (articleId === null) return null;
+    if (!isValid(articleId)) return null;
 
     const articlesIndex = this.statisticsStore.articles();
     return articlesIndex[articleId] ?? null;
@@ -157,7 +161,7 @@ export class AppReviewComponent implements OnInit {
 
   selectResult(result: ReviewResult) {
     const articleId = this.articleId();
-    if (articleId) {
+    if (isValid(articleId)) {
       this.reviewProcess(articleId, result);
     }
 
@@ -168,7 +172,7 @@ export class AppReviewComponent implements OnInit {
 
   async ngOnInit() {
     const articleId = this.articleId();
-    if (articleId) {
+    if (isValid(articleId)) {
       this.isLoading.set(true);
       await this.loadArticleContentLogic(articleId);
       this.isLoading.set(false);

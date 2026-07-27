@@ -9,6 +9,7 @@ import { loginGuard, noAuthGuard, noVaultGuard } from './app-route-guards';
 import { AppIndexComponent } from './features/index';
 import { AppConfigurationComponent } from './features/configuration/configuration';
 import { AppScoreComponent } from './features/score/score';
+import { ConsolidatePage } from './features/consolidate/consolidate.page';
 
 export const routes: Routes = [
   {
@@ -30,6 +31,7 @@ export const routes: Routes = [
       { path: 'score', component: AppScoreComponent },
       { path: 'plan', component: AppPlanComponent },
       { path: 'configuration', component: AppConfigurationComponent },
+      { path: 'consolidate', component: ConsolidatePage },
     ],
   },
   {

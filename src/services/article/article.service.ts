@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { getArticleId } from '../../app/model/article-id';
+import { generate } from '../../app/model/article-id';
 import { VaultArticle } from '../../app/model/vault-article';
 import { getDriveId } from '../../app/model/drive-id';
-import { isPath, parsePath, Path } from '../../app/model/path';
+import { getPath, isPath, parsePath, Path } from '../../app/model/path';
 import { parseDate } from '../../model/utils/invalid-date';
 
 /**
@@ -43,7 +43,7 @@ export class ArticleService {
     if (!topics.includes(pathTopic)) topics = [pathTopic, ...topics];
 
     return {
-      articleId: getArticleId(path, name),
+      articleId: generate(getPath(path), name),
       driveId: getDriveId(driveId),
       path: isPath(path) ? path : parsePath(path),
       name,

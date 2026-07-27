@@ -44,7 +44,7 @@ export const addReview: (data: AddReviewData) => PartialStateUpdater<VaultSlice>
 export type RemoveReviews = {
   articleId: ArticleId;
 };
-export const revoceReviews: (data: RemoveReviews) => PartialStateUpdater<VaultSlice> =
+export const removeReviews: (data: RemoveReviews) => PartialStateUpdater<VaultSlice> =
   ({ articleId }) =>
   (store) => ({
     reviewsIndex: {

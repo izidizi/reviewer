@@ -1,10 +1,11 @@
 import { inject, InjectionToken } from '@angular/core';
-import { getArticleId } from '../model/article-id';
+import { generate } from '../model/article-id';
 import { ReviewStorage } from '../../model/storage/review';
 import { StatisticsStore } from '../store/statistics/statistics.store';
 import { isReviewResult, ReviewResultUnknown } from '../model/review-result';
 import { VaultArticleStatistics } from '../model/vault-article-statistics';
 import { CalculateArticleScoreLogic } from './calculate-article-score';
+import { getPath } from '../model/path';
 
 export type UpdateArticleStatisticsLogic = (review: ReviewStorage) => void;
 export const UpdateArticleStatisticsLogic = new InjectionToken<UpdateArticleStatisticsLogic>(
@@ -16,7 +17,7 @@ export const UpdateArticleStatisticsLogic = new InjectionToken<UpdateArticleStat
       const calculateArticleScore = inject(CalculateArticleScoreLogic);
 
       return (review) => {
-        const articleId = getArticleId(review.path, review.name);
+        const articleId = generate(getPath(review.path), review.name);
         const articleStatistics = staisticsStore.articles()[articleId];
 
         const reviewed = new Date(review.reviewed);

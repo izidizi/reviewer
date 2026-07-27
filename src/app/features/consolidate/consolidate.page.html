@@ -1,0 +1,33 @@
+<div class="header">
+  <h2>Today's consolidate plan</h2>
+  <div class="actions">
+    <button type="button" matIconButton [matBadge]="hasChanges() ? '+' : null" (click)="save()">
+      <mat-icon class="material-icons-outlined">file_upload</mat-icon>
+    </button>
+
+  </div>
+</div>
+
+<h3>Consolidate list ({{this.consolidate().length}})</h3>
+<mat-list>
+  @for (article of this.consolidate(); track $index) {
+    <a mat-list-item (click)="open(article.articleId)">
+      <mat-icon
+        matListItemIcon
+        [class]="['list-item-icon','material-icons-outlined', article.result]"
+      >{{article.reviewed ? 'check_circle' : 'circle'}}</mat-icon>
+      <div matListItemTitle>
+        [<span class="days-value">{{article.daysWithoutReview}}</span>]
+        {{article.articleId}}
+      </div>
+
+      @if (article.tags.length > 0) {
+        <div matListItemLine class="tags">
+          @for (tag of article.tags; track $index) {
+            <app-tag [tag]="tag" />
+          }
+        </div>
+      }
+    </a>
+  }
+</mat-list>

@@ -3,6 +3,7 @@ import { VaultArticleStatistics } from '../../model/vault-article-statistics';
 import { StatisticsSlice } from './statistics.slice';
 import { VaultArticleExerciseStat } from '../../model/vault-article-exercise-stat';
 import { VaultDayStatistics } from '../../model/vault-day-statistics';
+import { ArticleId } from '../../model/article-id';
 
 export type SetArticleData = { articleStatistics: VaultArticleStatistics };
 export const setArticle: (data: SetArticleData) => PartialStateUpdater<StatisticsSlice> =
@@ -23,4 +24,11 @@ export const setDay: (data: SetDayData) => PartialStateUpdater<StatisticsSlice> 
   ({ dayStatistics }) =>
   (state) => ({
     days: { ...state.days, [dayStatistics.date]: dayStatistics },
+  });
+
+export type RemoveArticleData = { articleId: ArticleId };
+export const removeArticle: (data: RemoveArticleData) => PartialStateUpdater<StatisticsSlice> =
+  ({ articleId }) =>
+  (state) => ({
+    articles: { ...state.articles, [articleId]: undefined },
   });

@@ -1,23 +1,30 @@
+import { ArticleId } from '../../model/article-id';
 import { StatisticsStore } from '../../store/statistics/statistics.store';
 import { ExerciseStore } from '../../store/exercise/exercise.store';
 import { MoveArticleProcess } from '.';
-import { ArticleId } from '../../model/article-id';
 import { createPath } from '../../model/path';
 import { ProcessError, ProcessNotImplementedError } from '../../../model/error/process-error';
-import { ParseArticleIdBL } from '../../process-bl';
+import { ParseArticleIdLogic } from '../../process-bl';
 import { VaultStore } from '../../store/vault/vault.store';
 import { VaultStateStore } from '../../store/vault-state/vault-state.store';
 import { CacheStore } from '../../store/cache/cache.store';
+import { PlanStore } from '../../store/plan/plan.store';
+import { FeatureIndexStore } from '../../features/index/index.store';
+import { ReviewProcess } from '../review';
 
-export class InvalidArticleIdError extends ProcessError {
-  constructor(articleId: ArticleId) {
-    super({ process, message: `[${articleId}] is not found` });
+export class ArticleIdNotFoundError extends ProcessError {
+  constructor(articleId: ArticleId, direction: 'source' | 'destination') {
+    super({
+      process,
+      message: `${direction} article [${articleId}] not found`,
+    });
   }
 }
 
 const process = 'moveArticleProcess';
 export function moveArticleProcess({
   vault,
+  statistics,
   vaultState,
   cache,
   exerciseStore,
@@ -27,36 +34,39 @@ export function moveArticleProcess({
   vaultState: VaultStateStore;
   cache: CacheStore;
   exerciseStore: ExerciseStore;
-  parseArticleId: ParseArticleIdBL;
+  statistics: StatisticsStore;
+  plan: PlanStore;
+  featureIndexStore: FeatureIndexStore;
+  parseArticleId: ParseArticleIdLogic;
 }): MoveArticleProcess {
   return (from, to) => {
     const { path: fromPath, name: fromName } = parseArticleId(from);
     const { path: toPath, name: toName } = parseArticleId(to);
 
-    if (!fromName || !vault.articlesIndex[from]) throw new InvalidArticleIdError(from);
-    if (!toName || !vault.articlesIndex[to]) throw new InvalidArticleIdError(to);
+    if (!fromName || !vault.articlesIndex[from]) throw new ArticleIdNotFoundError(from, 'source');
+    if (!toName || !vault.articlesIndex[to]) throw new ArticleIdNotFoundError(to, 'destination');
 
-    throw new ProcessNotImplementedError({ process });
+    statistics.removeArticle({ articleId: from });
+    statistics.removeArticle({ articleId: to });
 
-    // const reviews = statisticsStore.reviews().map((review) => {
-    //   if (review.path !== createPath(fromPath) || review.name !== fromName) return review;
+    vault.removeArticle({ articleId: from, hasChanges: true });
 
-    //   return {
-    //     ...review,
-    //     path: createPath(toPath),
-    //     name: toName,
-    //   };
-    // });
-    // statisticsStore.setReviews(reviews);
-    // statisticsStore.setIsUpdated();
+    const fromReviews = vault.reviewsIndex()[from] ?? [];
+    fromReviews.forEach(({ reviewed, result }) =>
+      vault.addReview({
+        articleId: to,
+        review: {
+          path: createPath(toPath),
+          name: toName,
+          reviewed,
+          result,
+        },
+      }),
+    );
+    vault.removeReviews({ articleId: from });
 
-    // TODO: update statisticsStore.articles
-    // TODO: update statisticsStore.exercises
+    // TODO: update all other stores
 
-    // TODO: update exerciseStore.todayNew
-    // TODO: update exerciseStore.todayRepeat
-    // TODO: update exerciseStore.todayConsolidate
-
-    // vaultIndexStore.deleteArticle(from);
+    vaultState.setHasChanges({ hasChanges: true });
   };
 }

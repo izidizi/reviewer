@@ -11,3 +11,8 @@ export function parsePath(path: string): Path {
 export function isPath(path: string | Path): path is Path {
   return Array.isArray(path);
 }
+
+export function getPath(path: string | Path): Path {
+  if (isPath(path)) return path;
+  return parsePath(path);
+}

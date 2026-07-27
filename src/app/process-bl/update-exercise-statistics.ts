@@ -1,10 +1,11 @@
 import { inject, InjectionToken } from '@angular/core';
-import { getArticleId } from '../model/article-id';
+import { generate } from '../model/article-id';
 import { ReviewStorage } from '../../model/storage/review';
 import { StatisticsStore } from '../store/statistics/statistics.store';
 import { isReviewResult, ReviewResultUnknown } from '../model/review-result';
 import { VaultStore } from '../store/vault/vault.store';
 import { isISO8601String } from '../../model/utils';
+import { getPath } from '../model/path';
 
 export type UpdateExerciseStatisticsLogic = (review: ReviewStorage) => void;
 export const UpdateExerciseStatisticsLogic = new InjectionToken<UpdateExerciseStatisticsLogic>(
@@ -23,7 +24,7 @@ export const UpdateExerciseStatisticsLogic = new InjectionToken<UpdateExerciseSt
           : new Date('2026-01-01');
         const repeatTimes = configuration.repeatTimes;
 
-        const articleId = getArticleId(review.path, review.name);
+        const articleId = generate(getPath(review.path), review.name);
         const exerciseStatistics = staisticsStore.exercises()[articleId];
 
         const reviewed = new Date(review.reviewed);

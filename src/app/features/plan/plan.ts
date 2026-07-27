@@ -1,7 +1,7 @@
 import { Component, computed, inject, OnInit } from '@angular/core';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
-import { ArticleId, parseArticleId } from '../../model/article-id';
+import { ArticleId } from '../../model/article-id';
 import { Router } from '@angular/router';
 import { StatisticsStore } from '../../store/statistics/statistics.store';
 import { ExerciseStore } from '../../store/exercise/exercise.store';
@@ -68,25 +68,10 @@ export class AppPlanComponent implements OnInit {
     return newList.sort((a, b) => (a.name < b.name ? -1 : 1));
   });
 
-  readonly consolidate = computed(() => {
-    const articles = this.vault.articlesIndex();
-    const plannedConsolidate = this.exerciseStore.todayConsolidate();
-    const statistics = this.statisticsStore.articles();
-    const excersises = Object.values(this.statisticsStore.exercises());
-
-    const reviewedConsolidate = excersises
-      .filter((stat) => !!stat)
-      .filter(({ consolidations }) => consolidations.find(({ date }) => isToday(date)))
-      .map(({ articleId }) => articleId);
-
-    return this.getArticleView(plannedConsolidate, reviewedConsolidate, articles, statistics);
-  });
-
   open(articleId: ArticleId) {
     logAction(`open article`, place, { entity: articleId });
-    const { path, name } = parseArticleId(articleId);
     this.store.patchScroll(this.scroller.getScrollPosition());
-    this.router.navigate([...path, name]);
+    this.router.navigate(articleId.split('/'));
   }
 
   async ngOnInit() {
@@ -115,6 +100,7 @@ export class AppPlanComponent implements OnInit {
     reviewed: boolean;
     result: ReviewResult;
     score: number | null;
+    lastScore: number | null;
   }> {
     return Array.from(new Set([...planned, ...reviewed]).values())
       .sort((a, b) => (a < b ? -1 : 1))
@@ -126,6 +112,7 @@ export class AppPlanComponent implements OnInit {
           ? (statistics[articleId]?.lastResult ?? ReviewResultUnknown)
           : ReviewResultUnknown,
         score: statistics[articleId]?.score ?? null,
+        lastScore: 1,
       }));
   }
 

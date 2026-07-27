@@ -1,37 +1,59 @@
-import { inject, InjectionToken } from '@angular/core';
-import { ArticleId, toArticleId } from '../model/article-id';
-import { AppError } from '../../model/error/app-error';
-import { parsePath, Path } from '../model/path';
+import { InjectionToken } from '@angular/core';
+import { ArticleId, generate, from, parse, InvalidArticleId } from '../model/article-id';
+import { isPath, parsePath, Path } from '../model/path';
 
-export class InvalidArticleIdError extends AppError {
-  constructor(id: string) {
-    super(`[${id}] is not valid ArticleId`);
-  }
-}
+export type GenerateArticleIdLogic = (path: Path | string, name: string) => ArticleId;
+export const GenerateArticleIdLogic = new InjectionToken<GenerateArticleIdLogic>(
+  'GenerateArticleIdLogic',
+  {
+    providedIn: 'root',
+    factory: () => {
+      return (path: Path | string, name: string) =>
+        generate(isPath(path) ? path : parsePath(path), name);
+    },
+  },
+);
+
+export type CreateArticleIdFromStringLogic = (raw: string) => ArticleId;
+export const CreateArticleIdFromStringLogic = new InjectionToken<CreateArticleIdFromStringLogic>(
+  'CreateArticleIdFromStringLogic',
+  {
+    providedIn: 'root',
+    factory: () => {
+      return (raw: string) => {
+        const parts = raw.split('/');
+        const name = parts.splice(-1, 1);
+        return generate(parts, name[0]);
+      };
+    },
+  },
+);
+
+export type TryCreateArticleIdFromStringLogic = (raw: string) => ArticleId | InvalidArticleId;
+export const TryCreateArticleIdFromStringLogic =
+  new InjectionToken<TryCreateArticleIdFromStringLogic>('TryCreateArticleIdFromStringLogic', {
+    providedIn: 'root',
+    factory: () => {
+      return (raw: string) => from(raw);
+    },
+  });
 
 export type CreateArticleIdBL = (url: string) => ArticleId;
 export const CreateArticleIdBL = new InjectionToken<CreateArticleIdBL>('CreateArticleIdBL', {
   providedIn: 'root',
   factory: () => {
-    const parseArticleId = inject(ParseArticleIdBL);
-
     return (url: string) => {
-      const articleId = toArticleId(url);
-      parseArticleId(articleId);
-      return articleId;
+      const parts = url.split('/');
+      const name = parts.splice(-1, 1);
+      return generate(parts, name[0]);
     };
   },
 });
 
-export type ParseArticleIdBL = (articleId: ArticleId) => { path: Path; name: string };
-export const ParseArticleIdBL = new InjectionToken<ParseArticleIdBL>('ParseArticleIdBL', {
+export type ParseArticleIdLogic = (articleId: ArticleId) => { path: Path; name: string };
+export const ParseArticleIdLogic = new InjectionToken<ParseArticleIdLogic>('ParseArticleIdLogic', {
   providedIn: 'root',
   factory: () => {
-    return (articleId) => {
-      const path = parsePath(articleId);
-      const name = path.pop();
-      if (!name || name.slice(-3) !== '.md') throw new InvalidArticleIdError(articleId);
-      return { path, name };
-    };
+    return (articleId) => parse(articleId);
   },
 });

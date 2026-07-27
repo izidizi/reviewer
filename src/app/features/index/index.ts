@@ -1,4 +1,5 @@
-import { Component, effect, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, effect, inject, OnInit, signal } from '@angular/core';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -16,6 +17,10 @@ import { FeatureIndexStore } from './index.store';
 import { ViewportScroller } from '@angular/common';
 import { IndexVaultStore } from '../../scenarios/index-vault/index-vault.store';
 import { VaultStore } from '../../store/vault/vault.store';
+import { IndexStatistics } from './components/index-statistics';
+import { IndexOverflow } from './components/index-overflow';
+import { IndexFilterLogic } from './filter.logic';
+import { RenderRecordsLogic } from './render-records.logic';
 
 type IndexRecord = {
   position: number;
@@ -35,11 +40,14 @@ type IndexRecord = {
     MatFormFieldModule,
     MatInputModule,
     MatTableModule,
+    MatButtonToggleModule,
     AppIndexToolbar,
     MatProgressBarModule,
     MatButtonModule,
     ArticleDetailsComponent,
     AppArticleScoreComponent,
+    IndexStatistics,
+    IndexOverflow,
   ],
   templateUrl: 'index.html',
   styleUrl: 'index.scss',
@@ -52,12 +60,38 @@ export class AppIndexComponent implements OnInit {
   readonly statisticsStore = inject(StatisticsStore);
   readonly featureIndexStore = inject(FeatureIndexStore);
 
+  readonly filterLogic = inject(IndexFilterLogic);
+  readonly renderRecordsLogic = inject(RenderRecordsLogic);
+
+  readonly maxIndexRecords: number = 10;
+
+  readonly isRenderModeStatistics = computed(() => {
+    return this.featureIndexStore.renderMode() === 'stat';
+  });
+  readonly renderFilter = computed(() => {
+    return (
+      this.featureIndexStore.renderMode() === 'filter' &&
+      (this.articleIndexRecords().length <= this.maxIndexRecords ||
+        this.featureIndexStore.renderRecordsAnyway())
+    );
+  });
+  readonly renderFilterOverflow = computed(() => {
+    return (
+      this.featureIndexStore.renderMode() === 'filter' &&
+      this.articleIndexRecords().length > this.maxIndexRecords &&
+      this.featureIndexStore.renderRecordsAnyway() === false
+    );
+  });
   readonly filter = signal<string | null>(this.featureIndexStore.filter());
+  readonly articleIndexRecords = computed(() => {
+    const renderMode = this.featureIndexStore.renderMode();
 
-  readonly isIndexProcessActive = this.indexVaultStore.isIndexProcessActive;
-  readonly dataSource = new MatTableDataSource<IndexRecord>();
+    if (renderMode !== 'filter') return [];
 
-  readonly dataSourceEffect = effect(() => {
+    const filter = this.featureIndexStore.filter();
+    const filterNoScore = this.featureIndexStore.filterNoScore();
+
+    console.log('perform heavy computations');
     const articlesSet = new Set<ArticleId>();
 
     Object.entries(this.vault.articlesIndex())
@@ -68,39 +102,51 @@ export class AppIndexComponent implements OnInit {
       .filter((article): article is VaultArticleStatistics => !!article)
       .forEach(({ articleId }) => articlesSet.add(articleId));
 
-    this.dataSource.data = Array.from(articlesSet.values()).map((articleId, index) => {
-      const article = this.vault.article(articleId)();
-      const statistics = this.statisticsStore.articles()[articleId];
-      const score = statistics?.score ?? null;
-      const daysWithoutReview = statistics?.lastReviewInterval_days;
-      const lastReviewResult = statistics?.lastResult;
-      const scoreClass =
-        lastReviewResult === 'negative'
-          ? 'bad'
-          : lastReviewResult === 'positive'
-            ? 'good'
-            : 'normal';
+    return Array.from(articlesSet.values())
+      .filter((articleId) => articleId.toLowerCase().indexOf(filter.toLowerCase()) >= 0)
+      .map((articleId, index) => {
+        const article = this.vault.article(articleId)();
+        const statistics = this.statisticsStore.articles()[articleId];
+        const score = statistics?.score ?? null;
+        const daysWithoutReview = statistics?.lastReviewInterval_days;
+        const lastReviewResult = statistics?.lastResult;
+        const scoreClass =
+          lastReviewResult === 'negative'
+            ? 'bad'
+            : lastReviewResult === 'positive'
+              ? 'good'
+              : 'normal';
 
-      return {
-        position: index + 1,
-        exists: !!article,
-        articleId,
-        indexed:
-          !!article && isValidDate(article.indexed) ? article.indexed.toLocaleDateString() : '--',
-        totalReviewed: statistics
-          ? statistics.total.positive +
-            statistics.total.incomplete +
-            statistics.total.negative +
-            statistics.total.unknown
-          : 0,
-        score,
-        scoreClass,
-        tags: article?.tags ?? [],
-        topics: article?.topics ?? [],
-        daysWithoutReview:
-          daysWithoutReview != null ? Math.ceil(daysWithoutReview).toString() : '--',
-      };
-    });
+        return {
+          position: index + 1,
+          exists: !!article,
+          articleId,
+          indexed:
+            !!article && isValidDate(article.indexed) ? article.indexed.toLocaleDateString() : '--',
+          totalReviewed: statistics
+            ? statistics.total.positive +
+              statistics.total.incomplete +
+              statistics.total.negative +
+              statistics.total.unknown
+            : 0,
+          score,
+          scoreClass,
+          tags: article?.tags ?? [],
+          topics: article?.topics ?? [],
+          daysWithoutReview:
+            daysWithoutReview != null ? Math.ceil(daysWithoutReview).toString() : '--',
+        };
+      })
+      .filter((record) => (filterNoScore ? record.score === null : true));
+  });
+
+  readonly isIndexProcessActive = this.indexVaultStore.isIndexProcessActive;
+  readonly dataSource = new MatTableDataSource<IndexRecord>();
+
+  readonly dataSourceEffect = effect(() => {
+    const records = this.articleIndexRecords();
+
+    this.dataSource.data = records;
   });
 
   readonly displayedColumns = ['position', 'exists', 'articleId', 'score', 'daysWithoutReview'];
@@ -127,8 +173,22 @@ export class AppIndexComponent implements OnInit {
   }
 
   applyFilter(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.featureIndexStore.setFilter(filterValue);
-    this.dataSource.filter = filterValue.trim().toLowerCase();
+    this.filterLogic((event.target as HTMLInputElement).value);
+  }
+
+  renderRecords() {
+    this.renderRecordsLogic();
+  }
+
+  filterNoScore(val: boolean) {
+    this.featureIndexStore.setFilterNoScore(val);
+  }
+
+  clear() {
+    if (this.featureIndexStore.renderMode() === 'filter') {
+      this.featureIndexStore.setRenderMode('stat');
+    }
+    this.featureIndexStore.setFilter('');
+    this.featureIndexStore.setFilterNoScore(false);
   }
 }

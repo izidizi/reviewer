@@ -136,7 +136,7 @@ export function createPlanProcess({
         ({ articleId }) =>
           !newList.includes(articleId) &&
           !repeatList.includes(articleId) &&
-          (statisticsStore.articles()[articleId]?.score ?? 0) < 5,
+          (statisticsStore.articles()[articleId]?.score ?? 0) < 4.5,
       )
       .map(({ articleId }) => articleStatistics[articleId])
       .sort((a, b) => ((a?.lastReview ?? new Date(0)) < (b?.lastReview ?? new Date(0)) ? -1 : 1))
