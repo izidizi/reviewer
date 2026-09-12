@@ -1,4 +1,4 @@
-name: Build
+name: build
 
 on:
   push:
@@ -37,3 +37,4 @@ jobs:
         with:
           name: reviewer-build
           path: dist/reviewer/browser
+          retention-days: 1
