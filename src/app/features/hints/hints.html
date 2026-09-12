@@ -1,0 +1,45 @@
+<mat-toolbar>
+  <mat-toolbar-row>
+    <app-hints-header [title]="title()" (close)="onClose()" />
+  </mat-toolbar-row>
+</mat-toolbar>
+<div class="article-info">
+  <app-article-score-block [score]="score()" />
+
+  <app-article-last-result-block [lastResult]="lastReviewResult()" />
+</div>
+<div class="topics">
+    @for (topic of articleTopics(); track $index) {
+      <app-tag [topic]="topic" />
+    }
+</div>
+<h3>Hints</h3>
+<div class="hint-list">
+  <ul>
+    @for (hint of this.hintsState.hints(); track $index) {
+      <li>
+        <span [class]="hint.isTaken ? '' : 'blured'" >{{hint.maskedText}}</span>
+      </li>
+    }
+  </ul>
+</div>
+<div class="actions">
+  <button
+    type="button"
+    matButton
+    [disabled]="this.hintsState.allTaken()"
+    (click)="takeNextHint()"
+  >
+    Next hint
+  </button>
+
+  <button
+    type="button"
+    matButton="outlined"
+    (click)="openArticle()"
+  >
+    Open article
+  </button>
+</div>
+
+

@@ -44,6 +44,7 @@ export const ParseArticleLogic = new InjectionToken<ParseArticleLogic>('ParseArt
         name,
         tags: parseTags(content),
         topics,
+        hints: parseHints(content),
         indexed: dateToISO80601String(new Date()),
         created: dateToISO80601String(created),
       };
@@ -78,6 +79,20 @@ function parseTags(text: string): string[] {
         .filter((tag) => tag.length > 0),
     )
     .flat();
+}
+
+function parseHints(text: string): string[] {
+  const hintsToken = '### Hints';
+  const hintsIndex = text.indexOf(hintsToken);
+  if (hintsIndex < 0) return [];
+  const hintLines = text.slice(hintsIndex + hintsToken.length);
+
+  return hintLines
+    .replaceAll('\r', '\n')
+    .split('\n')
+    .map((line) => line.trim())
+    .map((line) => (line.slice(0, 2) === '- ' ? line.slice(2) : line))
+    .filter((line) => line.length > 0);
 }
 
 function getPathTopic(path: Path, indexPath: Path): string | null {

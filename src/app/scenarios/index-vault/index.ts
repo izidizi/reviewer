@@ -11,6 +11,7 @@ import { indexVaultScenario } from './index-vault.scenario';
 import { CheckAuthBL } from '../../process-bl';
 import { IndexVaultStore } from './index-vault.store';
 import { ParseArticleLogic } from '../../process-bl/parse-article';
+import { indexVaultAllScenario } from './index-vault-all.scenario';
 
 export type IndexVaultScenario = (config: {
   mode: 'missing' | 'all' | ArticleId;
@@ -21,9 +22,11 @@ export const IndexVaultScenario = new InjectionToken<IndexVaultScenario>('IndexV
   providedIn: 'root',
   factory: () => {
     const indexVaultMissingProcess = inject(IndexVaultMissingProcess);
+    const indexVaultAllScenario = inject(IndexVaultAllScenario);
 
     return indexVaultScenario({
       indexVaultMissingProcess,
+      indexVaultAllScenario,
     });
   },
 });
@@ -48,6 +51,37 @@ export const IndexVaultMissingProcess = new InjectionToken<IndexVaultMissingProc
       const parseArticleLogic = inject(ParseArticleLogic);
 
       return indexVaultMissingProcess({
+        driveApi,
+        decisionService,
+        indexVaultStore,
+        configurationStore,
+        vaultStore,
+        vaultStateStore,
+        checkAuthLogic,
+        getDirectoryDriveIdProcess,
+        parseArticleLogic,
+      });
+    },
+  },
+);
+
+export type IndexVaultAllScenario = (config: {}) => Promise<void>;
+export const IndexVaultAllScenario = new InjectionToken<IndexVaultAllScenario>(
+  'IndexVaultAllProcess',
+  {
+    providedIn: 'root',
+    factory: () => {
+      const driveApi = inject(DriveApiService);
+      const decisionService = inject(DecisionTableService);
+      const indexVaultStore = inject(IndexVaultStore);
+      const configurationStore = inject(ConfigurationStore);
+      const vaultStore = inject(VaultStore);
+      const vaultStateStore = inject(VaultStateStore);
+      const checkAuthLogic = inject(CheckAuthBL);
+      const getDirectoryDriveIdProcess = inject(GetDirectoryDriveIdProcess);
+      const parseArticleLogic = inject(ParseArticleLogic);
+
+      return indexVaultAllScenario({
         driveApi,
         decisionService,
         indexVaultStore,

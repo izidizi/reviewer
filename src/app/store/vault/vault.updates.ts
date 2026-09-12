@@ -17,11 +17,10 @@ export const addArticle: (data: AddArticleData) => PartialStateUpdater<VaultSlic
     },
   });
 
-export type RemoveArticleData = { articleId: ArticleId; hasChanges: boolean };
+export type RemoveArticleData = { articleId: ArticleId };
 export const removeArticle: (data: RemoveArticleData) => PartialStateUpdater<VaultSlice> =
-  ({ articleId, hasChanges }) =>
+  ({ articleId }) =>
   (store) => ({
-    hasChanges,
     articlesIndex: {
       ...store.articlesIndex,
       [articleId]: undefined,

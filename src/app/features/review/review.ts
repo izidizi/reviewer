@@ -17,7 +17,11 @@ import { ReviewResult, ReviewResultUnknown } from '../../model/review-result';
 import { StatisticsStore } from '../../store/statistics/statistics.store';
 import { isToday } from '../../helpers';
 import { ReviewProcess } from '../../processes/review';
-import { ParseArticleIdLogic, TryCreateArticleIdFromStringLogic } from '../../process-bl';
+import {
+  ParseArticleIdLogic,
+  TryCreateArticleIdFromStringLogic,
+  TryCreateArticleIdFromUrlLogic,
+} from '../../process-bl';
 import { NotificationService } from '../../services/notification.service';
 import { LoadArticleContentScenario } from './scenarios/get-article-content';
 import { ThemeService } from '../../../services/theme/theme.service';
@@ -55,6 +59,7 @@ export class AppReviewComponent implements OnInit {
   readonly statisticsStore = inject(StatisticsStore);
   readonly notificationService = inject(NotificationService);
   readonly tryCreateArticleIdFromString = inject(TryCreateArticleIdFromStringLogic);
+  readonly tryCreateArticleIdFromUrl = inject(TryCreateArticleIdFromUrlLogic);
   readonly parseArticleId = inject(ParseArticleIdLogic);
   readonly reviewProcess = inject(ReviewProcess);
   readonly loadArticleContentLogic = inject(LoadArticleContentScenario);
@@ -74,7 +79,7 @@ export class AppReviewComponent implements OnInit {
   /**
    * articleId
    */
-  readonly articleId = signal(this.tryCreateArticleIdFromString(this.articleUrl));
+  readonly articleId = signal(this.tryCreateArticleIdFromUrl(this.articleUrl));
   readonly article = computed(() => {
     const articleId = this.articleId();
     if (!isValid(articleId)) return null;

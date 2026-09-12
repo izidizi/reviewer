@@ -91,7 +91,6 @@ export class AppIndexComponent implements OnInit {
     const filter = this.featureIndexStore.filter();
     const filterNoScore = this.featureIndexStore.filterNoScore();
 
-    console.log('perform heavy computations');
     const articlesSet = new Set<ArticleId>();
 
     Object.entries(this.vault.articlesIndex())

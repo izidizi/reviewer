@@ -49,6 +49,7 @@ export class ArticleService {
       name,
       tags: this.parseTags(content),
       topics,
+      hints: this.parseHints(content),
       indexed: new Date(),
       created,
     };
@@ -75,5 +76,19 @@ export class ArticleService {
           .filter((tag) => tag.length > 0),
       )
       .flat();
+  }
+
+  parseHints(text: string): string[] {
+    const hintsToken = '### Hints';
+    const hintsIndex = text.indexOf(hintsToken);
+    if (hintsIndex < 0) return [];
+    const hintLines = text.slice(hintsIndex + hintsToken.length);
+
+    return hintLines
+      .replaceAll('\r', '\n')
+      .split('\n')
+      .map((line) => line.trim())
+      .map((line) => (line.slice(0, 2) === '- ' ? line.slice(2) : line))
+      .filter((line) => line.length > 0);
   }
 }

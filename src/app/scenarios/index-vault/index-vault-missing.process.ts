@@ -60,6 +60,7 @@ export function indexVaultMissingProcess({
     while (foldersToRead.length > 0) {
       const folderInfo = foldersToRead.shift();
       if (!folderInfo) break;
+      console.log(`${folderInfo.path}`);
 
       const { files } = await driveApi.listFiles(accessToken, folderInfo.id).catch((error) => {
         logError(error, `${process} - failed to list files`, `dir: ${folderInfo.path}`);
@@ -91,7 +92,6 @@ export function indexVaultMissingProcess({
     for (const file of foundFiles) {
       const articleId = generate(getPath(file.path), file.name);
       const article = vaultStore.article(articleId)();
-
       const articleReindexRule = genereateArticleReindexRule(
         article,
         reindexArticlesWithInvalidIndexDate,
@@ -145,6 +145,7 @@ export function indexVaultMissingProcess({
         });
 
         logDebug(`${process} - article reindexed`, { entity: articleId, payload: article });
+        console.log(`   ${articleId} reindexed`);
       }
     }
 

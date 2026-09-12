@@ -21,6 +21,7 @@ export const createArticleLogic: CreateArticleLogic = ({
   name,
   tags,
   topics,
+  hints,
   indexed,
   created,
 }) => ({
@@ -30,6 +31,7 @@ export const createArticleLogic: CreateArticleLogic = ({
   name,
   tags,
   topics,
+  hints: hints ?? [],
   indexed: parseDate(indexed),
   created: parseDate(created),
 });

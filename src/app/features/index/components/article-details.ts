@@ -6,13 +6,22 @@ import { MatCardModule } from '@angular/material/card';
 import { ArticleView } from './article-view';
 import { formatDate } from '../../../helpers';
 import { VaultStore } from '../../../store/vault/vault.store';
+import { ArticleDeleteComponent } from './delete';
 
 @Component({
   selector: 'app-index-article-details',
-  imports: [ArticleMoveToComponent, MatCardModule, ArticleView],
+  imports: [ArticleMoveToComponent, ArticleDeleteComponent, MatCardModule, ArticleView],
   styles: `
     :host {
       min-height: 0;
+    }
+
+    mat-card-content {
+      display: flex;
+      align-items: baseline;
+      app-index-article-move-to {
+        flex-grow: 1;
+      }
     }
   `,
   template: `
@@ -32,6 +41,7 @@ import { VaultStore } from '../../../store/vault/vault.store';
 
       <mat-card-content>
         <app-index-article-move-to [articleId]="articleId()" />
+        <app-index-article-delete [articleId]="articleId()" />
       </mat-card-content>
     </mat-card>
   `,

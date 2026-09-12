@@ -12,6 +12,30 @@ import { ParseArticleLogic } from '../../process-bl/parse-article';
 import { StatisticsStore } from '../../store/statistics/statistics.store';
 import { PlanStore } from '../../store/plan/plan.store';
 import { FeatureIndexStore } from '../../features/index/index.store';
+import { deleteArticleProcess } from './delete.process';
+
+export type DeleteArticleProcess = (articleId: ArticleId) => void;
+export const DeleteArticleProcess = new InjectionToken<DeleteArticleProcess>(
+  'DeleteArticleProcess',
+  {
+    providedIn: 'root',
+    factory: () => {
+      const vault = inject(VaultStore);
+      const vaultState = inject(VaultStateStore);
+      const cache = inject(CacheStore);
+      const statistics = inject(StatisticsStore);
+      const plan = inject(PlanStore);
+
+      return deleteArticleProcess({
+        vault,
+        vaultState,
+        cache,
+        statistics,
+        plan,
+      });
+    },
+  },
+);
 
 export type MoveArticleProcess = (from: ArticleId, to: ArticleId) => void;
 export const MoveArticleProcess = new InjectionToken<MoveArticleProcess>('MoveArticleProcess', {

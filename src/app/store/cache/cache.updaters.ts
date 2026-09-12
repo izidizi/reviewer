@@ -17,3 +17,15 @@ export const cacheArticle: (data: CacheArticleData) => PartialStateUpdater<Cache
       },
     },
   });
+
+export type RemoveArticleData = {
+  articleId: ArticleId;
+};
+export const removeArticle: (data: RemoveArticleData) => PartialStateUpdater<CacheSlice> =
+  ({ articleId }) =>
+  (store) => ({
+    articlesContent: {
+      ...store.articlesContent,
+      [articleId]: undefined,
+    },
+  });

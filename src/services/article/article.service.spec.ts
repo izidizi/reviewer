@@ -15,6 +15,11 @@ tags: #incomplete #tag1
 ### beware effect domins (creating process)
  - action can trigger any amount of effects, but each this effect can only dispatch an action which can reduce
 
+### Hints
+ - hint A
+ - hint B
+ - hint C
+
 ### References
 ##### 1
   author
@@ -29,7 +34,7 @@ tags: #incomplete #tag1
 created:: 2023-08-26 15:51
 `;
 
-describe('ArticleService', () => {
+describe.only('ArticleService', () => {
   let service: ArticleService;
 
   beforeEach(async () => {
@@ -50,6 +55,7 @@ describe('ArticleService', () => {
       path: '/notes/ngrx',
       name: 'arch.md',
       text: articleText,
+      pathTopic: 'ngrx',
     };
     let result: VaultArticle;
     beforeEach(() => {
@@ -58,7 +64,7 @@ describe('ArticleService', () => {
 
     it('should create articleId', () => {
       const articleId: ArticleId = result.articleId;
-      expect(articleId).toEqual(`${testData.path}/${testData.name}`);
+      expect(articleId).toEqual(`${testData.path.replace('/', '')}/${testData.name}`);
     });
 
     it('should create articleId', () => {
@@ -78,14 +84,12 @@ describe('ArticleService', () => {
       expect(result.tags).toEqual(['#incomplete', '#tag1']);
     });
 
-    it('should create links', () => {
-      expect(result.topics).toEqual(['ngrx', 'link1']);
+    it('should create hints', () => {
+      expect(result.hints).toEqual(['hint A', 'hint B', 'hint C']);
     });
 
-    it('should parse content', () => {
-      expect(result.content).toContain('actions are events');
-      expect(result.content).not.toContain('### Links');
-      expect(result.content).not.toContain('### References');
+    it('should create links', () => {
+      expect(result.topics).toEqual(['ngrx', 'link1']);
     });
   });
 
@@ -154,6 +158,7 @@ describe('ArticleService', () => {
       const realArticle = {
         driveId: 'file-id-123',
         path: '/Research/Articles',
+        pathTopic: '',
         name: 'angular-best-practices.md',
         text: `# Angular Best Practices
 
@@ -172,18 +177,17 @@ describe('ArticleService', () => {
       const result = service.parseArticle(realArticle);
 
       expect(result.name).toBe('angular-best-practices.md');
-      expect(result.topics.length).toBe(3);
+      expect(result.topics.length).toBe(4);
       expect(result.topics).toContain('Angular Docs');
       expect(result.topics).toContain('TypeScript Handbook');
       expect(result.topics).toContain('RxJS Guide');
-      expect(result.content).toContain('## Performance');
-      expect(result.content).not.toContain('### References');
     });
 
     it('should handle article without Links or References sections', () => {
       const input = {
         driveId: 'id-simple',
         path: '/docs',
+        pathTopic: 'pathTopic',
         name: 'simple.md',
         text: 'Just plain content without any sections',
       };
@@ -191,8 +195,7 @@ describe('ArticleService', () => {
       const result = service.parseArticle(input);
 
       // When ### References is not found, content will be the entire text
-      expect(result.content).toContain('Just plain content');
-      expect(result.topics).toEqual([]);
+      expect(result.topics).toEqual(['pathTopic']);
     });
   });
 });

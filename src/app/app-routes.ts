@@ -10,6 +10,7 @@ import { AppIndexComponent } from './features/index';
 import { AppConfigurationComponent } from './features/configuration/configuration';
 import { AppScoreComponent } from './features/score/score';
 import { ConsolidatePage } from './features/consolidate/consolidate.page';
+import { AppHintsComponent } from './features/hints/hints';
 
 export const routes: Routes = [
   {
@@ -32,6 +33,16 @@ export const routes: Routes = [
       { path: 'plan', component: AppPlanComponent },
       { path: 'configuration', component: AppConfigurationComponent },
       { path: 'consolidate', component: ConsolidatePage },
+      {
+        path: 'hints',
+        pathMatch: 'prefix',
+        children: [
+          {
+            path: '**',
+            component: AppHintsComponent,
+          },
+        ],
+      },
     ],
   },
   {

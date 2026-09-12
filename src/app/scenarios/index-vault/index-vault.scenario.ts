@@ -1,5 +1,5 @@
 import { logDebug } from '../../../services/debug-logger';
-import { IndexVaultMissingProcess, IndexVaultScenario } from '.';
+import { IndexVaultAllScenario, IndexVaultMissingProcess, IndexVaultScenario } from '.';
 import { ProcessError } from '../../../model/error/process-error';
 
 export class IndexVaultScenarioNotImplementedError extends ProcessError {
@@ -11,8 +11,10 @@ export class IndexVaultScenarioNotImplementedError extends ProcessError {
 const process = 'IndexVaultScenario';
 export function indexVaultScenario({
   indexVaultMissingProcess,
+  indexVaultAllScenario,
 }: {
   indexVaultMissingProcess: IndexVaultMissingProcess;
+  indexVaultAllScenario: IndexVaultAllScenario;
 }): IndexVaultScenario {
   return async ({ mode, reindexArticlesWithInvalidIndexDate, reindexArticlesOlderThan }) => {
     logDebug(`${process} - start`, { includeStack: true });
@@ -23,7 +25,7 @@ export function indexVaultScenario({
         reindexArticlesOlderThan,
       });
     } else if (mode === 'all') {
-      throw new IndexVaultScenarioNotImplementedError(mode);
+      await indexVaultAllScenario({});
     } else {
       throw new IndexVaultScenarioNotImplementedError(`article`);
     }

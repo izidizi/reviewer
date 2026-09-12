@@ -49,7 +49,7 @@ export function moveArticleProcess({
     statistics.removeArticle({ articleId: from });
     statistics.removeArticle({ articleId: to });
 
-    vault.removeArticle({ articleId: from, hasChanges: true });
+    vault.removeArticle({ articleId: from });
 
     const fromReviews = vault.reviewsIndex()[from] ?? [];
     fromReviews.forEach(({ reviewed, result }) =>

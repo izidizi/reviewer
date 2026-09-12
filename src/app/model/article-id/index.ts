@@ -28,6 +28,10 @@ export function from(raw: string): ArticleId | InvalidArticleId {
   return raw as ArticleId;
 }
 
+export function fromUrl(url: string): ArticleId | InvalidArticleId {
+  return from(decodeURIComponent(url));
+}
+
 export function isValid(articleId: ArticleId | InvalidArticleId): articleId is ArticleId {
   const content = parseFromString(articleId);
 

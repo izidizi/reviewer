@@ -152,13 +152,13 @@ function loadConfigurationProcess({
       // index
       const vaultIndexStorage = configurationMap['index.json'] as VaultIndexStorage;
       vaultIndexStorage.articles.forEach(
-        ({ driveId, path, name, topics: links, tags, indexed, created }) => {
+        ({ driveId, path, name, topics: links, tags, hints, indexed, created }) => {
           logDebug(`${process} - parsing article`, { entity: `${path}/${name}` });
           const articleId: ArticleId = generate(getPath(path), name);
 
           vaultStore.addArticle({
             articleId,
-            article: { driveId, path, name, topics: links, tags, indexed, created },
+            article: { driveId, path, name, topics: links, tags, hints, indexed, created },
           });
         },
       );

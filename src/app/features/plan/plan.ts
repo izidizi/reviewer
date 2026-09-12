@@ -69,9 +69,17 @@ export class AppPlanComponent implements OnInit {
   });
 
   open(articleId: ArticleId) {
-    logAction(`open article`, place, { entity: articleId });
     this.store.patchScroll(this.scroller.getScrollPosition());
-    this.router.navigate(articleId.split('/'));
+
+    const article = this.vault.article(articleId)();
+    if (article) {
+      logAction(`open article`, place, { entity: articleId });
+      if (article.hints.length > 0) {
+        this.router.navigate(['hints', ...articleId.split('/')]);
+      } else {
+        this.router.navigate(articleId.split('/'));
+      }
+    }
   }
 
   async ngOnInit() {

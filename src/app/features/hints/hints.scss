@@ -1,0 +1,31 @@
+mat-toolbar-row {
+  white-space: initial; }
+
+.topics {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem 0; }
+
+.article-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; }
+
+li {
+  margin-top: calc(2 * var(--spacing-base-value)); }
+.blured {
+  filter: blur(4px); }
+
+.actions {
+  margin-top: calc(4 * var(--spacing-base-value));
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: calc(4 * var(--spacing-base-value)); }
+
+.hint-list {
+  padding: 0.5rem;
+  border: 1px solid color-mix(in srgb, var(--mat-sys-surface), var(--mat-sys-on-surface) 10%);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--mat-sys-surface), var(--mat-sys-on-surface) 5%);
+}

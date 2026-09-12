@@ -10,6 +10,7 @@ export type VaultArticle = {
   name: string;
   tags: string[];
   topics: string[];
+  hints: string[];
   indexed: Date | InvalidDate;
   created: Date | InvalidDate;
 };

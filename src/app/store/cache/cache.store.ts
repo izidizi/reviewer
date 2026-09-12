@@ -11,6 +11,8 @@ export const CacheStore = signalStore(
     return {
       cacheArticle: (data: updaters.CacheArticleData) =>
         patchState(store, updaters.cacheArticle(data)),
+      removeArticle: (data: updaters.RemoveArticleData) =>
+        patchState(store, updaters.removeArticle(data)),
     };
   }),
 );

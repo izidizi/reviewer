@@ -150,8 +150,6 @@ describe('DecisionTableService', () => {
     );
     expect(decisionTable.length).toEqual(32);
 
-    console.log(decisionTable.filter(({ outcome }) => !outcome));
-
     const decide = service.getDecisionProcessor(decisionTable);
   });
 });

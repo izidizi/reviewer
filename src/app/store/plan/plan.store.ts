@@ -101,6 +101,8 @@ export const PlanStore = signalStore(
       patchPlan: (data: updaters.PatchPlanData) => patchState(store, updaters.patchPlan(data)),
       patchConsolidatePlan: (data: updaters.PatchConsolidatePlanData) =>
         patchState(store, updaters.patchConsolidatePlan(data)),
+      removeArticle: (data: updaters.RemoveArticleData) =>
+        patchState(store, updaters.removeArticle(data)),
     };
   }),
 );

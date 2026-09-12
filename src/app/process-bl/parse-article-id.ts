@@ -1,5 +1,5 @@
 import { InjectionToken } from '@angular/core';
-import { ArticleId, generate, from, parse, InvalidArticleId } from '../model/article-id';
+import { ArticleId, generate, from, parse, InvalidArticleId, fromUrl } from '../model/article-id';
 import { isPath, parsePath, Path } from '../model/path';
 
 export type GenerateArticleIdLogic = (path: Path | string, name: string) => ArticleId;
@@ -37,6 +37,17 @@ export const TryCreateArticleIdFromStringLogic =
       return (raw: string) => from(raw);
     },
   });
+
+export type TryCreateArticleIdFromUrlLogic = (url: string) => ArticleId | InvalidArticleId;
+export const TryCreateArticleIdFromUrlLogic = new InjectionToken<TryCreateArticleIdFromStringLogic>(
+  'TryCreateArticleIdFromUrlLogic',
+  {
+    providedIn: 'root',
+    factory: () => {
+      return (raw: string) => fromUrl(raw);
+    },
+  },
+);
 
 export type CreateArticleIdBL = (url: string) => ArticleId;
 export const CreateArticleIdBL = new InjectionToken<CreateArticleIdBL>('CreateArticleIdBL', {
