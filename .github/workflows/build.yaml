@@ -26,5 +26,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
-        run: npm run build
+      - name: Build Angular
+        run: npx ng build --base-href /reviewer/
+
+      - name: Copy production config
+        run: npx shx cp config/config.prod.json dist/reviewer/browser/config.json
