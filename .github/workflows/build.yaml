@@ -31,3 +31,9 @@ jobs:
 
       - name: Copy production config
         run: npx shx cp config/config.prod.json dist/reviewer/browser/config.json
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: reviewer-build
+          path: dist/reviewer/browser
