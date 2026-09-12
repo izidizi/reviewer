@@ -4,8 +4,8 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "prebuild": "npm version patch --no-git-tag-version",
     "build": "ng build && shx cp config/config.prod.json dist/reviewer/browser/config.json",
+    "version-bump": "npm version patch --no-git-tag-version",
     "copy-config": "shx cp config/config.prod.json dist/reviewer/browser/config.json",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
