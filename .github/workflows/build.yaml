@@ -32,6 +32,9 @@ jobs:
       - name: Copy production config
         run: npx shx cp config/config.prod.json dist/reviewer/browser/config.json
 
+      - name: Prepare GitHub Pages SPA router fallback
+        run: cp dist/reviewer/browser/index.html dist/reviewer/browser/404.html
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
